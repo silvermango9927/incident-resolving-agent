@@ -2,6 +2,9 @@
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 const fileName = document.getElementById('file-name');
+const textInput = document.getElementById('text-input');
+const charCount = document.getElementById('char-count');
+const clearTextBtn = document.getElementById('clear-text-btn');
 const analyzeBtn = document.getElementById('analyze-btn');
 const uploadSection = document.getElementById('upload-section');
 const loadingSection = document.getElementById('loading-section');
@@ -12,8 +15,15 @@ const themeToggle = document.getElementById('theme-toggle');
 const sunIcon = document.getElementById('sun-icon');
 const moonIcon = document.getElementById('moon-icon');
 
+// Tab elements
+const fileTab = document.getElementById('file-tab');
+const textTab = document.getElementById('text-tab');
+const filePanel = document.getElementById('file-panel');
+const textPanel = document.getElementById('text-panel');
+
 // State
 let selectedFile = null;
+let currentInputMode = 'file'; // 'file' or 'text'
 
 // Theme Management
 function initTheme() {
@@ -38,6 +48,60 @@ themeToggle.addEventListener('click', () => {
     
     // Show toast notification
     showToast(isDark ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+});
+
+// Tab Management
+fileTab.addEventListener('click', () => switchTab('file'));
+textTab.addEventListener('click', () => switchTab('text'));
+
+function switchTab(mode) {
+    currentInputMode = mode;
+    
+    if (mode === 'file') {
+        // Activate file tab
+        fileTab.classList.add('active');
+        textTab.classList.remove('active');
+        filePanel.classList.add('active');
+        textPanel.classList.remove('active');
+        fileTab.setAttribute('aria-selected', 'true');
+        textTab.setAttribute('aria-selected', 'false');
+        
+        // Enable button if file is selected
+        analyzeBtn.disabled = !selectedFile;
+    } else {
+        // Activate text tab
+        textTab.classList.add('active');
+        fileTab.classList.remove('active');
+        textPanel.classList.add('active');
+        filePanel.classList.remove('active');
+        textTab.setAttribute('aria-selected', 'true');
+        fileTab.setAttribute('aria-selected', 'false');
+        
+        // Enable button if text is entered
+        analyzeBtn.disabled = textInput.value.trim() === '';
+        
+        // Focus on textarea
+        setTimeout(() => textInput.focus(), 100);
+    }
+}
+
+// Text Input Handlers
+textInput.addEventListener('input', () => {
+    const length = textInput.value.length;
+    charCount.textContent = `${length.toLocaleString()} character${length !== 1 ? 's' : ''}`;
+    
+    // Enable/disable analyze button based on text content
+    if (currentInputMode === 'text') {
+        analyzeBtn.disabled = textInput.value.trim() === '';
+    }
+});
+
+clearTextBtn.addEventListener('click', () => {
+    textInput.value = '';
+    charCount.textContent = '0 characters';
+    analyzeBtn.disabled = true;
+    textInput.focus();
+    showToast('🗑️ Text cleared');
 });
 
 // Toast Notification
@@ -108,7 +172,10 @@ function handleFileSelect(file) {
     selectedFile = file;
     fileName.textContent = `Selected: ${file.name}`;
     fileName.style.display = 'inline-block';
-    analyzeBtn.disabled = false;
+    
+    if (currentInputMode === 'file') {
+        analyzeBtn.disabled = false;
+    }
     
     // Add animation to file name
     fileName.style.animation = 'none';
@@ -121,8 +188,6 @@ function handleFileSelect(file) {
 
 // Analyze button click handler
 analyzeBtn.addEventListener('click', async () => {
-    if (!selectedFile) return;
-    
     // Show loading state with animation
     uploadSection.style.animation = 'fadeOut 0.3s ease-out';
     setTimeout(() => {
@@ -133,7 +198,16 @@ analyzeBtn.addEventListener('click', async () => {
     
     // Create FormData and send to backend
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    
+    if (currentInputMode === 'file' && selectedFile) {
+        formData.append('file', selectedFile);
+    } else if (currentInputMode === 'text') {
+        formData.append('text', textInput.value);
+    } else {
+        showToast('❌ No input provided');
+        resetToUpload();
+        return;
+    }
     
     try {
         const response = await fetch('/analyze', {
@@ -231,7 +305,12 @@ function resetToUpload() {
     fileName.textContent = '';
     fileName.style.display = 'none';
     fileInput.value = '';
+    textInput.value = '';
+    charCount.textContent = '0 characters';
     analyzeBtn.disabled = true;
+    
+    // Reset to file tab
+    switchTab('file');
     
     resultsSection.style.animation = 'fadeOut 0.3s ease-out';
     setTimeout(() => {

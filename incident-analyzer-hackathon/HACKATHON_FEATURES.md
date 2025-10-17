@@ -10,6 +10,7 @@ This enhanced version of the Incident Analyzer includes all the features request
 
 ### 1. AI-Powered Incident Analysis
 - Upload incident log files (.txt, .log, .json)
+- **Direct Text Entry**: Paste incident logs directly into a dedicated text area
 - Simulated AI analysis with structured results
 - Root cause identification
 - Step-by-step remediation plan
@@ -48,11 +49,18 @@ This enhanced version of the Incident Analyzer includes all the features request
 - **Timestamped Filenames**: Auto-generated names like `incident_analysis_20251017_090141.csv`
 - **One-Click Download**: Green download button with icon in results header
 
+### 5. Text Entry for Incident Reports
+- **Dual Input Modes**: Seamlessly switch between file upload and direct text pasting via intuitive tabs.
+- **Dedicated Text Area**: Large, monospace-enabled text area for pasting incident logs or reports.
+- **Character Counter**: Dynamically updates to show the length of the entered text.
+- **Clear Button**: One-click option to clear the text area.
+- **Smart Enablement**: Analyze button enables automatically when text is present.
+
 ---
 
 ## 🎯 Additional Enhancements
 
-### 5. Toast Notifications
+### 6. Toast Notifications
 - **User Feedback**: Elegant slide-in notifications for all actions
 - **Smart Messaging**:
   - 📄 "File selected successfully"
@@ -60,10 +68,11 @@ This enhanced version of the Incident Analyzer includes all the features request
   - ✅ "Analysis complete!"
   - 📥 "CSV downloaded successfully"
   - ❌ Error messages when operations fail
+  - 🗑️ "Text cleared"
 - **Auto-Dismiss**: Notifications automatically fade out after 2 seconds
 - **Smooth Animations**: Slide-in from right, slide-out on dismiss
 
-### 6. Enhanced File Upload Experience
+### 7. Enhanced File Upload Experience
 - **Drag-and-Drop Zone**: 
   - Visual feedback on hover (gradient shift, border color change)
   - Drag-over state with scale animation and glow effect
@@ -72,7 +81,7 @@ This enhanced version of the Incident Analyzer includes all the features request
 - **File Selection Feedback**: Selected filename appears in styled badge
 - **Keyboard Accessible**: Press Enter or Space on drop zone to open file dialog
 
-### 7. Advanced Visual Design
+### 8. Advanced Visual Design
 
 #### Gradient Elements
 - Buttons with gradient backgrounds
@@ -92,13 +101,14 @@ This enhanced version of the Incident Analyzer includes all the features request
 - **Grayscale Palette**: 10 shades for backgrounds and text
 - **Theme-Aware**: All colors switch based on active theme
 
-### 8. Accessibility Features
+### 9. Accessibility Features
 
 #### ARIA Support
 - Descriptive labels for all interactive elements
 - Live regions for dynamic content updates
 - Semantic HTML structure (section, article, header)
 - Screen reader announcements for state changes
+- Tab navigation for input methods
 
 #### Keyboard Navigation
 - Full keyboard accessibility
@@ -112,14 +122,14 @@ This enhanced version of the Incident Analyzer includes all the features request
 - Sufficient text sizes
 - No reliance on color alone for information
 
-### 9. Performance Optimizations
+### 10. Performance Optimizations
 - **Lightweight**: No heavy frameworks (React, Vue, Angular)
 - **Fast Loading**: Minimal external resources (only Google Fonts)
 - **GPU-Accelerated Animations**: Using CSS transforms and opacity
 - **Efficient DOM**: Minimal manipulation and reflows
 - **Optimized Assets**: Inline SVG icons, no image files
 
-### 10. Developer Experience
+### 11. Developer Experience
 - **Clean Code Structure**: Organized files and clear separation of concerns
 - **Comprehensive Comments**: Well-documented code
 - **Modular CSS**: Custom properties for easy customization
@@ -155,7 +165,7 @@ This enhanced version of the Incident Analyzer includes all the features request
 - **HTML5**: Semantic markup with accessibility features
 - **CSS3**: Modern features (custom properties, flexbox, animations)
 - **Vanilla JavaScript**: No framework dependencies
-- **Google Fonts**: Inter font family
+- **Google Fonts**: Inter font family, Fira Code for code/logs
 
 ### Backend
 - **Flask**: Lightweight Python web framework
@@ -186,7 +196,7 @@ This enhanced version of the Incident Analyzer includes all the features request
 ### Demo-Ready Features
 
 - **Visual Impact**: Beautiful gradients and animations immediately catch attention
-- **Interactive Demo**: Theme toggle and file upload provide engaging interaction
+- **Interactive Demo**: Theme toggle, file upload, and text entry provide engaging interaction
 - **Practical Use Case**: Solves a real problem (incident analysis)
 - **Export Capability**: CSV download shows data portability
 - **Responsive**: Works on any device for flexible demo scenarios
@@ -199,6 +209,7 @@ This enhanced version of the Incident Analyzer includes all the features request
 4. **Accessibility**: "We built this with WCAG 2.1 Level AA compliance to ensure everyone can use it"
 5. **Performance**: "No heavy frameworks means fast load times and smooth interactions"
 6. **Scalability**: "The backend is designed to easily integrate with real AI models"
+7. **Flexible Input**: "Users can either upload a file or paste text directly, catering to different workflows"
 
 ---
 
@@ -208,10 +219,10 @@ This enhanced version of the Incident Analyzer includes all the features request
 incident-analyzer/
 ├── app.py                      # Flask backend with analyze and download endpoints
 ├── templates/
-│   └── index.html             # Enhanced HTML with theme toggle and download button
+│   └── index.html             # Enhanced HTML with theme toggle, tabs, and text input
 ├── static/
-│   ├── style.css              # Comprehensive CSS with dark theme support
-│   └── main.js                # JavaScript with theme management and CSV download
+│   ├── style.css              # Comprehensive CSS with dark theme support and tab styles
+│   └── main.js                # JavaScript with theme management, tabs, and CSV download
 ├── sample-incident.log        # Example log file for testing
 ├── README.md                  # Detailed setup and usage instructions
 └── HACKATHON_FEATURES.md     # This file - complete feature documentation
@@ -226,7 +237,8 @@ incident-analyzer/
 3. **Demo flow**:
    - Show the beautiful landing page
    - Toggle dark/light theme to demonstrate
-   - Upload the sample-incident.log file
+   - Demonstrate file upload with `sample-incident.log`
+   - Demonstrate text entry by pasting some logs
    - Click "Analyze Incident"
    - Show the structured results
    - Click "Download CSV" to export

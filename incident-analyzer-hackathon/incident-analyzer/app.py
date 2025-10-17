@@ -16,17 +16,26 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     """
-    Simulated analysis endpoint.
+    Analyze endpoint that accepts either file upload or text input.
     In production, this would call your Python backend for actual incident analysis.
     """
     global last_analysis_result
     
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+    # Check if it's a file upload or text input
+    content = None
+    source_name = None
     
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
+    if 'file' in request.files and request.files['file'].filename != '':
+        # File upload
+        file = request.files['file']
+        source_name = file.filename
+        content = file.read().decode('utf-8')
+    elif 'text' in request.form and request.form['text'].strip():
+        # Text input
+        content = request.form['text']
+        source_name = 'Text Input'
+    else:
+        return jsonify({'error': 'No file or text provided'}), 400
     
     # Simulate processing time
     time.sleep(2)
@@ -49,7 +58,7 @@ Root Cause: Memory leak in connection handler
 Resolution: Service restart + hotfix deployment
 Follow-up: Connection pool monitoring enhancement required''',
         'ticket_status': 'PROJ-1234',
-        'filename': file.filename,
+        'filename': source_name,
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
     
@@ -75,7 +84,7 @@ def download_csv():
     # Write header
     writer.writerow(['Incident Analysis Report'])
     writer.writerow(['Generated:', last_analysis_result.get('timestamp', 'N/A')])
-    writer.writerow(['Source File:', last_analysis_result.get('filename', 'N/A')])
+    writer.writerow(['Source:', last_analysis_result.get('filename', 'N/A')])
     writer.writerow([])
     
     # Root Cause

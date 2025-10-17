@@ -1,4 +1,4 @@
-# Incident Analyzer - Enhanced Edition
+# Incident Analyzer - Hackathon Edition
 
 A modern, visually stunning AI-powered incident analysis tool built with Flask, featuring a professional UI/UX design with rich animations, gradients, and full accessibility support.
 
@@ -8,7 +8,7 @@ A modern, visually stunning AI-powered incident analysis tool built with Flask, 
 
 The application features a **professional, modern interface** that goes far beyond basic design:
 
-- **Vibrant Gradient Background**: Beautiful purple-to-pink gradient with subtle grid pattern
+- **Vibrant Gradient Background**: Beautiful purple-to-pink gradient (light mode) and deep indigo gradient (dark mode)
 - **Smooth Animations**: Fade-in effects, transitions, hover states, and micro-interactions
 - **Rich Color System**: Comprehensive color palette with CSS custom properties
 - **Professional Typography**: Inter font family with carefully crafted hierarchy
@@ -19,6 +19,7 @@ The application features a **professional, modern interface** that goes far beyo
 ### User Experience
 
 - **Intuitive File Upload**: Drag-and-drop with visual feedback and hover effects
+- **Direct Text Entry**: Paste incident logs directly into a dedicated text area
 - **Clear State Management**: Distinct visual states for upload, loading, and results
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Keyboard Navigation**: Full keyboard accessibility with visible focus states
@@ -48,10 +49,10 @@ Analysis results are presented in beautifully designed cards:
 incident-analyzer/
 ├── app.py                    # Flask application with /analyze endpoint
 ├── templates/
-│   └── index.html           # Enhanced HTML with accessibility features
+│   └── index.html           # Enhanced HTML with accessibility features, tabs, and text input
 ├── static/
-│   ├── style.css            # Modern CSS with animations and gradients
-│   └── main.js              # Vanilla JavaScript with smooth transitions
+│   ├── style.css            # Modern CSS with animations, gradients, and dark theme support
+│   └── main.js              # Vanilla JavaScript with smooth transitions, theme, tabs, and CSV download
 ├── sample-incident.log      # Example log file for testing
 └── README.md                # This file
 ```
@@ -91,40 +92,44 @@ incident-analyzer/
 
 ## Usage Guide
 
-### Step 1: Upload File
+### Step 1: Provide Incident Data
 
-You have two options to upload an incident log file:
+You have two options to provide incident data:
 
-- **Drag and Drop**: Drag a `.txt`, `.log`, or `.json` file onto the highlighted upload area
-- **Click to Select**: Click the "Select a file" button to open a file browser
+- **Upload File**: Drag a `.txt`, `.log`, or `.json` file onto the highlighted upload area, or click "Select a file".
+- **Paste Text**: Switch to the "Paste Text" tab and paste your incident logs or report directly into the text area.
 
-The upload zone provides visual feedback:
-- Hover effect with gradient background shift
-- Drag-over state with solid border and glow
-- Selected file name appears in a styled badge
+The interface provides visual feedback:
+- Hover effects and animations on the drop zone.
+- Selected file name appears in a styled badge.
+- Character count updates dynamically for text input.
 
 ### Step 2: Analyze
 
-Once a file is selected:
-- The "Analyze Incident" button becomes active (gradient blue background)
-- Click the button to start analysis
-- The interface transitions to a loading state with an animated spinner
+Once a file is selected or text is entered:
+- The "Analyze Incident" button becomes active (gradient blue background).
+- Click the button to start analysis.
+- The interface transitions to a loading state with an animated spinner.
 
 ### Step 3: Review Results
 
 After analysis completes (approximately 2 seconds):
-- Results appear in structured, color-coded cards
-- Root cause is displayed with detailed explanation
-- Remediation steps are numbered with gradient badges
-- Escalation summary appears in a terminal-style code block
-- Ticket creation status is shown in a success card
+- Results appear in structured, color-coded cards.
+- Root cause is displayed with detailed explanation.
+- Remediation steps are numbered with gradient badges.
+- Escalation summary appears in a terminal-style code block.
+- Ticket creation status is shown in a success card.
 
-### Step 4: New Analysis
+### Step 4: Download CSV (Optional)
+
+- Click the "Download CSV" button in the results header to export the analysis report.
+
+### Step 5: New Analysis
 
 Click the "New Analysis" button to:
-- Reset the interface to the upload state
-- Clear all previous results
-- Select and analyze a new file
+- Reset the interface to the input state.
+- Clear all previous results.
+- Start a new analysis with a different file or text.
 
 ## Backend Integration
 
@@ -135,17 +140,9 @@ The current implementation includes a **simulated analysis endpoint** for demons
 Replace the simulated logic in `app.py` with your actual incident analysis code:
 
 ```python
-@app.route('/analyze', methods=['POST'])
+@app.route("/analyze", methods=["POST"])
 def analyze():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    
-    # Read file content
-    content = file.read().decode('utf-8')
+    # ... (content extraction logic remains the same)
     
     # YOUR ANALYSIS LOGIC HERE
     # Replace this with your actual AI-powered analysis
@@ -173,10 +170,10 @@ Your backend should return JSON in this structure:
 
 ### 3. Error Handling
 
-The frontend handles errors gracefully with alert messages. Ensure your backend returns appropriate HTTP status codes:
+The frontend handles errors gracefully with toast messages. Ensure your backend returns appropriate HTTP status codes:
 
 - `200`: Success
-- `400`: Bad request (invalid file)
+- `400`: Bad request (invalid input)
 - `500`: Server error (analysis failure)
 
 ## Design System
@@ -186,11 +183,13 @@ The frontend handles errors gracefully with alert messages. Ensure your backend 
 - **Primary**: Indigo (`#4f46e5`) - Main actions and accents
 - **Secondary**: Cyan (`#06b6d4`) - Secondary elements
 - **Success**: Green (`#10b981`) - Success states
+- **Warning**: Orange (`#f59e0b`) - Warning states
+- **Danger**: Red (`#ef4444`) - Error states
 - **Grayscale**: 10 shades for backgrounds and text
 
 ### Typography
 
-- **Font Family**: Inter (loaded from Google Fonts)
+- **Font Family**: Inter (loaded from Google Fonts) for UI, Fira Code for code/logs
 - **Weights**: 400 (regular), 500 (medium), 600 (semibold), 700 (bold), 800 (extrabold)
 - **Sizes**: Responsive scale from 14px to 48px
 
@@ -224,7 +223,7 @@ Note: Internet Explorer is not supported due to modern CSS features.
 
 - **Backend**: Flask (Python)
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Fonts**: Google Fonts (Inter)
+- **Fonts**: Google Fonts (Inter, Fira Code)
 - **No Dependencies**: No Bootstrap, React, Vue, or other heavy frameworks
 
 ## Performance
@@ -307,5 +306,5 @@ This project is provided as-is for your use and customization.
 
 ## Support
 
-For questions or issues, please refer to the code comments or the `ENHANCED_DESIGN_SHOWCASE.md` file for detailed design documentation.
+For questions or issues, please refer to the code comments or the `ENHANCED_DESIGN_SHOWCASE.md` and `HACKATHON_FEATURES.md` files for detailed design and feature documentation.
 
