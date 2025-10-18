@@ -15,6 +15,28 @@ const themeToggle = document.getElementById('theme-toggle');
 const sunIcon = document.getElementById('sun-icon');
 const moonIcon = document.getElementById('moon-icon');
 
+// Voice-to-text and autocomplete variables
+let isListening = false;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+const autocompleteList = [
+    'Database connection failed',
+    'API request timeout',
+    'Service degradation detected',
+    'Memory leak detected',
+    'CPU usage spike',
+    'Disk space critical',
+    'Network latency increased',
+    'Authentication failed',
+    'Permission denied',
+    'Resource exhaustion',
+    'Connection refused',
+    'Timeout error',
+    'Invalid configuration',
+    'Deployment failed',
+    'Service unavailable'
+];
+
 // Tab elements
 const fileTab = document.getElementById('file-tab');
 const textTab = document.getElementById('text-tab');
@@ -121,6 +143,119 @@ function showToast(message) {
         toast.classList.add('hide');
         setTimeout(() => toast.remove(), 300);
     }, 2000);
+}
+
+// Voice-to-text functionality
+function initVoiceRecognition() {
+    if (!recognition) {
+        console.warn('Speech Recognition not supported in this browser');
+        return;
+    }
+    
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    recognition.onstart = () => {
+        isListening = true;
+        showToast('🎤 Listening...');
+    };
+    
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                textInput.value += transcript + ' ';
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        const length = textInput.value.length;
+        charCount.textContent = `${length.toLocaleString()} character${length !== 1 ? 's' : ''}`;
+        
+        if (currentInputMode === 'text') {
+            analyzeBtn.disabled = textInput.value.trim() === '';
+        }
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        showToast('❌ Voice input error: ' + event.error);
+    };
+    
+    recognition.onend = () => {
+        isListening = false;
+        const voiceBtn = document.getElementById('voice-btn');
+        if (voiceBtn) {
+            voiceBtn.classList.remove('listening');
+        }
+        showToast('🎤 Voice input ended');
+    };
+}
+
+// Autocomplete functionality
+function initAutocomplete() {
+    const autocompleteContainer = document.createElement('div');
+    autocompleteContainer.id = 'autocomplete-list';
+    autocompleteContainer.className = 'autocomplete-list';
+    const textInputContainer = document.querySelector('.text-input-container');
+    if (textInputContainer) {
+        textInputContainer.style.position = 'relative'; // Ensure parent is relatively positioned
+        textInputContainer.appendChild(autocompleteContainer);
+    } else {
+        console.error('text-input-container not found');
+    }
+    
+    textInput.addEventListener('input', () => {
+        const value = textInput.value.trim();
+        const lastLine = value.split('\n').pop();
+        
+        if (lastLine.length < 2) {
+            autocompleteContainer.innerHTML = '';
+            return;
+        }
+        
+        const matches = autocompleteList.filter(item => 
+            item.toLowerCase().includes(lastLine.toLowerCase())
+        );
+        
+        if (matches.length === 0) {
+            autocompleteContainer.innerHTML = '';
+            return;
+        }
+        
+        autocompleteContainer.innerHTML = matches.map((match, index) => 
+            `<div class="autocomplete-item" data-index="${index}">${match}</div>`
+        ).join('');
+        
+        // Add click handlers to autocomplete items
+        document.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lines = textInput.value.split('\n');
+                lines[lines.length - 1] = item.textContent;
+                textInput.value = lines.join('\n');
+                autocompleteContainer.innerHTML = '';
+                
+                const length = textInput.value.length;
+                charCount.textContent = `${length.toLocaleString()} character${length !== 1 ? 's' : ''}`;
+                
+                if (currentInputMode === 'text') {
+                    analyzeBtn.disabled = textInput.value.trim() === '';
+                }
+                
+                textInput.focus();
+            });
+        });
+    });
+    
+    // Close autocomplete on blur
+    textInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            autocompleteContainer.innerHTML = '';
+        }, 200);
+    });
 }
 
 // Drag and Drop Handlers
@@ -346,11 +481,123 @@ style.textContent = `
             transform: translateY(-10px);
         }
     }
+    
+    /* Autocomplete styles */
+    .autocomplete-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        color: var(--text-primary);
+        transition: background-color 0.2s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+        background-color: var(--card-bg-secondary);
+    }
+    
+    /* Voice button styles */
+    .voice-btn {
+        padding: 10px 16px;
+        background: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .voice-btn:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .voice-btn:active {
+        transform: translateY(0);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .voice-btn.listening {
+        background: var(--danger);
+        animation: pulse 1s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+    
+    .voice-btn svg {
+        width: 18px;
+        height: 18px;
+    }
 `;
 document.head.appendChild(style);
 
 // Initialize theme on page load
 initTheme();
+
+// Initialize voice recognition
+initVoiceRecognition();
+
+// Initialize autocomplete
+initAutocomplete();
+
+// Add voice input button to text panel
+const voiceBtn = document.createElement('button');
+voiceBtn.id = 'voice-btn';
+voiceBtn.className = 'voice-btn';
+voiceBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v12a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg> Voice Input';
+voiceBtn.setAttribute('aria-label', 'Voice input button');
+voiceBtn.addEventListener('click', () => {
+    if (!recognition) {
+        showToast('❌ Voice input not supported in this browser');
+        return;
+    }
+    
+    if (isListening) {
+        recognition.stop();
+        voiceBtn.classList.remove('listening');
+    } else {
+        recognition.start();
+        voiceBtn.classList.add('listening');
+    }
+});
+
+// Insert voice button after clear button in text panel
+const textInputFooter = document.querySelector('.text-input-footer');
+if (textInputFooter) {
+    textInputFooter.appendChild(voiceBtn);
+}
 
 // Add keyboard shortcut for theme toggle (Ctrl/Cmd + Shift + D)
 document.addEventListener('keydown', (e) => {
@@ -359,4 +606,12 @@ document.addEventListener('keydown', (e) => {
         themeToggle.click();
     }
 });
+
+
+
+// Initialize functionality
+initTheme();
+initVoiceRecognition();
+initAutocomplete();
+switchTab(currentInputMode); // Set initial tab state
 

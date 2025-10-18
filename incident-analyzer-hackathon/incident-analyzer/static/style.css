@@ -955,3 +955,119 @@ html {
     }
 }
 
+
+
+/* Autocomplete styles */
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+    margin-top: -1px;
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background-color: var(--card-bg-secondary);
+    color: var(--primary);
+}
+
+/* Voice button styles */
+.voice-btn {
+    padding: 10px 16px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: var(--shadow-sm);
+}
+
+.voice-btn:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.voice-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+.voice-btn.listening {
+    background: var(--danger);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.voice-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Text input footer adjustments */
+.text-input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Responsive adjustments for voice button */
+@media (max-width: 480px) {
+    .voice-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        gap: 4px;
+    }
+    
+    .voice-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .autocomplete-list {
+        max-height: 150px;
+    }
+    
+    .autocomplete-item {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+

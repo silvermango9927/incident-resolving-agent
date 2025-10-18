@@ -5,14 +5,12 @@ import io
 import json
 import re
 import asyncio
+import urllib.request
+import os
 from datetime import datetime
-from openai import OpenAI
 from fastmcp import Client
 
 app = Flask(__name__)
-
-# Initialize OpenAI client
-client_openai = OpenAI()
 
 # Initialize MCP client (assuming orchestration agent is running)
 mcp_client = Client("http://127.0.0.1:8000") # Default FastMCP server address
@@ -60,10 +58,25 @@ async def analyze_incident_with_ai(content: str) -> dict:
         # Get the analysis prompt from the MCP orchestration agent
         analysis_prompt_template = await get_incident_analysis_prompt_from_mcp(content)
         
-        # Call OpenAI API
-        response = client_openai.chat.completions.create(
-            model="gpt-4.1-mini", # Using gpt-4.1-mini as specified in environment
-            messages=[
+        url = "https://psacodesprint2025.azure-api.net/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2025-01-01-preview"
+
+        api_key = os.getenv('AZURE_OPENAI_API_KEY', '')
+        if not api_key:
+            return {
+                "root_cause": "Azure OpenAI API key not configured. Please set the AZURE_OPENAI_API_KEY environment variable.",
+                "remediation_steps": [],
+                "escalation_summary": "Configuration error: Missing API key.",
+                "ticket_status": "PROJ-CONFIG-ERROR"
+            }
+        
+        hdr ={
+            'Content-Type': 'application/json',
+            'api-key': api_key,
+            'Cache-Control': 'no-cache',
+        }
+
+        data = {
+            "messages": [
                 {
                     "role": "system",
                     "content": "You are an expert incident response analyst. Always respond with valid JSON only."
@@ -73,13 +86,29 @@ async def analyze_incident_with_ai(content: str) -> dict:
                     "content": analysis_prompt_template
                 }
             ],
-            temperature=0.7,
-            max_tokens=1500
-        )
+            "temperature": 0.7,
+            "max_tokens": 1500
+        }
         
-        # Extract the response text
-        response_text = response.choices[0].message.content.strip()
+        data = json.dumps(data)
+        req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
+        req.get_method = lambda: 'POST'
         
+        response = urllib.request.urlopen(req)
+        
+        response_text = ""
+        if response.getcode() == 200:
+            response_data = json.loads(response.read().decode('utf-8'))
+            response_text = response_data['choices'][0]['message']['content'].strip()
+        else:
+            print(f"Error from API: {response.getcode()} {response.read()}")
+            return {
+                "root_cause": f"An error occurred during analysis: {response.getcode()} {response.read()}",
+                "remediation_steps": [],
+                "escalation_summary": "API call failed.",
+                "ticket_status": "PROJ-FAILED"
+            }
+
         # Parse the JSON response
         json_match = re.search(r"\{.*\}", response_text, re.DOTALL)
         if json_match:
@@ -239,4 +268,3 @@ def health():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
-
