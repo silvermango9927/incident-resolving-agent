@@ -4,28 +4,37 @@ import csv
 import io
 import json
 import re
+import asyncio
 from datetime import datetime
 from openai import OpenAI
+from fastmcp import Client
 
 app = Flask(__name__)
 
 # Initialize OpenAI client
-client = OpenAI()
+client_openai = OpenAI()
+
+# Initialize MCP client (assuming orchestration agent is running)
+mcp_client = Client("http://127.0.0.1:8000") # Default FastMCP server address
 
 # Store the last analysis result for CSV download
 last_analysis_result = None
 
-def analyze_incident_with_ai(content: str) -> dict:
+async def get_incident_analysis_prompt_from_mcp(incident_description: str) -> str:
     """
-    Analyze incident content using OpenAI API for real, dynamic analysis.
-    This replaces the hardcoded simulation with actual AI-powered analysis.
+    Retrieves the incident analysis prompt from the MCP orchestration agent.
     """
     try:
-        # Create a prompt for incident analysis
-        analysis_prompt = f"""You are an expert incident response analyst. Analyze the following incident log or report and provide a structured response in JSON format.
+        async with mcp_client:
+            prompt = await mcp_client.get_prompt("incident_analysis_prompt", {"incident_description": incident_description})
+            return prompt
+    except Exception as e:
+        print(f"Error getting prompt from MCP: {e}")
+        # Fallback to a default prompt if MCP is unavailable or errors
+        return f"""You are an expert incident response analyst. Analyze the following incident log or report and provide a structured response in JSON format.
 
 Incident Content:
-{content}
+{incident_description}
 
 Provide your analysis in the following JSON format (return ONLY valid JSON, no other text):
 {{
@@ -43,9 +52,17 @@ Provide your analysis in the following JSON format (return ONLY valid JSON, no o
 
 Ensure the response is valid JSON that can be parsed. Make the analysis specific to the incident content provided."""
 
+async def analyze_incident_with_ai(content: str) -> dict:
+    """
+    Analyze incident content using OpenAI API, with the prompt retrieved from the MCP agent.
+    """
+    try:
+        # Get the analysis prompt from the MCP orchestration agent
+        analysis_prompt_template = await get_incident_analysis_prompt_from_mcp(content)
+        
         # Call OpenAI API
-        response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+        response = client_openai.chat.completions.create(
+            model="gpt-4.1-mini", # Using gpt-4.1-mini as specified in environment
             messages=[
                 {
                     "role": "system",
@@ -53,7 +70,7 @@ Ensure the response is valid JSON that can be parsed. Make the analysis specific
                 },
                 {
                     "role": "user",
-                    "content": analysis_prompt
+                    "content": analysis_prompt_template
                 }
             ],
             temperature=0.7,
@@ -64,8 +81,7 @@ Ensure the response is valid JSON that can be parsed. Make the analysis specific
         response_text = response.choices[0].message.content.strip()
         
         # Parse the JSON response
-        # Try to extract JSON from the response in case there's extra text
-        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        json_match = re.search(r"\{.*\}", response_text, re.DOTALL)
         if json_match:
             response_text = json_match.group(0)
         
@@ -91,7 +107,6 @@ Ensure the response is valid JSON that can be parsed. Make the analysis specific
         
     except json.JSONDecodeError as e:
         print(f"JSON parsing error: {e}")
-        # Return a fallback response if JSON parsing fails
         return {
             "root_cause": "The incident analysis could not be completed due to a processing error. Please review the incident logs manually.",
             "remediation_steps": [
@@ -106,7 +121,6 @@ Ensure the response is valid JSON that can be parsed. Make the analysis specific
         }
     except Exception as e:
         print(f"Error during analysis: {e}")
-        # Return a fallback response for any other errors
         return {
             "root_cause": f"An error occurred during analysis: {str(e)}",
             "remediation_steps": [
@@ -120,59 +134,53 @@ Ensure the response is valid JSON that can be parsed. Make the analysis specific
             "ticket_status": "PROJ-FAILED"
         }
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/analyze', methods=['POST'])
+@app.route("/analyze", methods=["POST"])
 def analyze():
     """
     Analyze endpoint that accepts either file upload or text input.
-    Now integrated with OpenAI for real, dynamic incident analysis.
+    Now integrated with OpenAI for real, dynamic incident analysis, using prompt from MCP agent.
     """
     global last_analysis_result
     
-    # Check if it's a file upload or text input
     content = None
     source_name = None
     
-    if 'file' in request.files and request.files['file'].filename != '':
-        # File upload
-        file = request.files['file']
+    if "file" in request.files and request.files["file"].filename != "":
+        file = request.files["file"]
         source_name = file.filename
         try:
-            content = file.read().decode('utf-8')
+            content = file.read().decode("utf-8")
         except UnicodeDecodeError:
-            return jsonify({'error': 'File must be a valid text file (UTF-8 encoded)'}), 400
-    elif 'text' in request.form and request.form['text'].strip():
-        # Text input
-        content = request.form['text']
-        source_name = 'Text Input'
+            return jsonify({"error": "File must be a valid text file (UTF-8 encoded)"}), 400
+    elif "text" in request.form and request.form["text"].strip():
+        content = request.form["text"]
+        source_name = "Text Input"
     else:
-        return jsonify({'error': 'No file or text provided'}), 400
+        return jsonify({"error": "No file or text provided"}), 400
     
-    # Validate content length
     if len(content.strip()) < 10:
-        return jsonify({'error': 'Incident content must be at least 10 characters long'}), 400
+        return jsonify({"error": "Incident content must be at least 10 characters long"}), 400
     
     try:
-        # Perform real AI-powered analysis
-        analysis_results = analyze_incident_with_ai(content)
+        # Run the async analysis function
+        analysis_results = asyncio.run(analyze_incident_with_ai(content))
         
-        # Add metadata
-        analysis_results['filename'] = source_name
-        analysis_results['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        analysis_results["filename"] = source_name
+        analysis_results["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Store for CSV download
         last_analysis_result = analysis_results
         
         return jsonify(analysis_results)
         
     except Exception as e:
         print(f"Error in analyze endpoint: {e}")
-        return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
+        return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
 
-@app.route('/download-csv', methods=['GET'])
+@app.route("/download-csv", methods=["GET"])
 def download_csv():
     """
     Generate and download a CSV file with the analysis results.
@@ -180,65 +188,55 @@ def download_csv():
     global last_analysis_result
     
     if not last_analysis_result:
-        return jsonify({'error': 'No analysis results available'}), 400
+        return jsonify({"error": "No analysis results available"}), 400
     
-    # Create CSV in memory
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Write header
-    writer.writerow(['Incident Analysis Report'])
-    writer.writerow(['Generated:', last_analysis_result.get('timestamp', 'N/A')])
-    writer.writerow(['Source:', last_analysis_result.get('filename', 'N/A')])
+    writer.writerow(["Incident Analysis Report"])
+    writer.writerow(["Generated:", last_analysis_result.get("timestamp", "N/A")])
+    writer.writerow(["Source:", last_analysis_result.get("filename", "N/A")])
     writer.writerow([])
     
-    # Root Cause
-    writer.writerow(['Root Cause Analysis'])
-    writer.writerow([last_analysis_result.get('root_cause', '')])
+    writer.writerow(["Root Cause Analysis"])
+    writer.writerow([last_analysis_result.get("root_cause", "")])
     writer.writerow([])
     
-    # Remediation Steps
-    writer.writerow(['Remediation Steps'])
-    for i, step in enumerate(last_analysis_result.get('remediation_steps', []), 1):
-        writer.writerow([f'{i}. {step}'])
+    writer.writerow(["Remediation Steps"])
+    for i, step in enumerate(last_analysis_result.get("remediation_steps", []), 1):
+        writer.writerow([f"{i}. {step}"])
     writer.writerow([])
     
-    # Escalation Summary
-    writer.writerow(['Escalation Summary'])
-    for line in last_analysis_result.get('escalation_summary', '').split('\n'):
+    writer.writerow(["Escalation Summary"])
+    for line in last_analysis_result.get("escalation_summary", "").split("\n"):
         writer.writerow([line])
     writer.writerow([])
     
-    # Ticket Status
-    writer.writerow(['Ticket Status'])
+    writer.writerow(["Ticket Status"])
     writer.writerow([f'Ticket {last_analysis_result.get("ticket_status", "N/A")} created successfully.'])
     
-    # Prepare file for download
     output.seek(0)
     bytes_output = io.BytesIO()
-    bytes_output.write(output.getvalue().encode('utf-8'))
+    bytes_output.write(output.getvalue().encode("utf-8"))
     bytes_output.seek(0)
     
     filename = f'incident_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     
     return send_file(
         bytes_output,
-        mimetype='text/csv',
+        mimetype="text/csv",
         as_attachment=True,
         download_name=filename
     )
 
-@app.route('/health', methods=['GET'])
+@app.route("/health", methods=["GET"])
 def health():
-    """
-    Health check endpoint to verify the service is running.
-    """
     return jsonify({
-        'status': 'healthy',
-        'service': 'Incident Analyzer',
-        'timestamp': datetime.now().isoformat()
+        "status": "healthy",
+        "service": "Incident Analyzer",
+        "timestamp": datetime.now().isoformat()
     })
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
 
