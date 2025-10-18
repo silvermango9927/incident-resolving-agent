@@ -2,12 +2,123 @@ from flask import Flask, render_template, request, jsonify, send_file
 import time
 import csv
 import io
+import json
+import re
 from datetime import datetime
+from openai import OpenAI
 
 app = Flask(__name__)
 
+# Initialize OpenAI client
+client = OpenAI()
+
 # Store the last analysis result for CSV download
 last_analysis_result = None
+
+def analyze_incident_with_ai(content: str) -> dict:
+    """
+    Analyze incident content using OpenAI API for real, dynamic analysis.
+    This replaces the hardcoded simulation with actual AI-powered analysis.
+    """
+    try:
+        # Create a prompt for incident analysis
+        analysis_prompt = f"""You are an expert incident response analyst. Analyze the following incident log or report and provide a structured response in JSON format.
+
+Incident Content:
+{content}
+
+Provide your analysis in the following JSON format (return ONLY valid JSON, no other text):
+{{
+    "root_cause": "A detailed explanation of the root cause based on the incident data",
+    "remediation_steps": [
+        "Step 1: First action to take",
+        "Step 2: Second action to take",
+        "Step 3: Third action to take",
+        "Step 4: Fourth action to take",
+        "Step 5: Fifth action to take"
+    ],
+    "escalation_summary": "A multi-line summary for escalation purposes with key details about the incident, severity, duration, impact, and resolution",
+    "ticket_status": "PROJ-XXXX"
+}}
+
+Ensure the response is valid JSON that can be parsed. Make the analysis specific to the incident content provided."""
+
+        # Call OpenAI API
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert incident response analyst. Always respond with valid JSON only."
+                },
+                {
+                    "role": "user",
+                    "content": analysis_prompt
+                }
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        # Extract the response text
+        response_text = response.choices[0].message.content.strip()
+        
+        # Parse the JSON response
+        # Try to extract JSON from the response in case there's extra text
+        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        if json_match:
+            response_text = json_match.group(0)
+        
+        analysis_result = json.loads(response_text)
+        
+        # Ensure all required fields are present
+        if "root_cause" not in analysis_result:
+            analysis_result["root_cause"] = "Unable to determine root cause from the provided incident data."
+        if "remediation_steps" not in analysis_result:
+            analysis_result["remediation_steps"] = [
+                "Review the incident logs in detail",
+                "Identify affected systems and services",
+                "Implement temporary mitigation measures",
+                "Deploy permanent fix or patch",
+                "Monitor system for recurrence"
+            ]
+        if "escalation_summary" not in analysis_result:
+            analysis_result["escalation_summary"] = "Incident analysis completed. See root cause and remediation steps above."
+        if "ticket_status" not in analysis_result:
+            analysis_result["ticket_status"] = "PROJ-AUTO"
+        
+        return analysis_result
+        
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        # Return a fallback response if JSON parsing fails
+        return {
+            "root_cause": "The incident analysis could not be completed due to a processing error. Please review the incident logs manually.",
+            "remediation_steps": [
+                "Review incident logs for error patterns",
+                "Check system health and resource availability",
+                "Verify database and service connectivity",
+                "Implement monitoring and alerting",
+                "Schedule post-incident review"
+            ],
+            "escalation_summary": "Incident analysis encountered an error. Manual review recommended.",
+            "ticket_status": "PROJ-ERROR"
+        }
+    except Exception as e:
+        print(f"Error during analysis: {e}")
+        # Return a fallback response for any other errors
+        return {
+            "root_cause": f"An error occurred during analysis: {str(e)}",
+            "remediation_steps": [
+                "Check the incident data format",
+                "Verify system connectivity",
+                "Retry the analysis",
+                "Contact support if issues persist",
+                "Document the incident for review"
+            ],
+            "escalation_summary": f"Analysis failed with error: {str(e)}",
+            "ticket_status": "PROJ-FAILED"
+        }
 
 @app.route('/')
 def index():
@@ -17,7 +128,7 @@ def index():
 def analyze():
     """
     Analyze endpoint that accepts either file upload or text input.
-    In production, this would call your Python backend for actual incident analysis.
+    Now integrated with OpenAI for real, dynamic incident analysis.
     """
     global last_analysis_result
     
@@ -29,7 +140,10 @@ def analyze():
         # File upload
         file = request.files['file']
         source_name = file.filename
-        content = file.read().decode('utf-8')
+        try:
+            content = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            return jsonify({'error': 'File must be a valid text file (UTF-8 encoded)'}), 400
     elif 'text' in request.form and request.form['text'].strip():
         # Text input
         content = request.form['text']
@@ -37,35 +151,26 @@ def analyze():
     else:
         return jsonify({'error': 'No file or text provided'}), 400
     
-    # Simulate processing time
-    time.sleep(2)
+    # Validate content length
+    if len(content.strip()) < 10:
+        return jsonify({'error': 'Incident content must be at least 10 characters long'}), 400
     
-    # Simulated analysis results
-    results = {
-        'root_cause': 'Database connection pool exhaustion caused by a memory leak in the connection handler. The pool reached maximum capacity (100 connections) at 14:23 UTC, preventing new database queries from executing.',
-        'remediation_steps': [
-            'Restart the database connection pool service to immediately restore functionality',
-            'Deploy the hotfix patch (v2.3.1) that addresses the memory leak in the connection handler',
-            'Increase the connection pool size from 100 to 200 as a temporary mitigation',
-            'Implement connection timeout monitoring with alerts at 80% capacity threshold',
-            'Schedule a full audit of database connection patterns across all services'
-        ],
-        'escalation_summary': '''Incident: Database Connection Pool Exhaustion
-Severity: P1 - Critical
-Duration: 23 minutes (14:23 - 14:46 UTC)
-Impact: 100% of API requests failed during the incident window
-Root Cause: Memory leak in connection handler
-Resolution: Service restart + hotfix deployment
-Follow-up: Connection pool monitoring enhancement required''',
-        'ticket_status': 'PROJ-1234',
-        'filename': source_name,
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    }
-    
-    # Store for CSV download
-    last_analysis_result = results
-    
-    return jsonify(results)
+    try:
+        # Perform real AI-powered analysis
+        analysis_results = analyze_incident_with_ai(content)
+        
+        # Add metadata
+        analysis_results['filename'] = source_name
+        analysis_results['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Store for CSV download
+        last_analysis_result = analysis_results
+        
+        return jsonify(analysis_results)
+        
+    except Exception as e:
+        print(f"Error in analyze endpoint: {e}")
+        return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
 
 @app.route('/download-csv', methods=['GET'])
 def download_csv():
@@ -122,6 +227,17 @@ def download_csv():
         as_attachment=True,
         download_name=filename
     )
+
+@app.route('/health', methods=['GET'])
+def health():
+    """
+    Health check endpoint to verify the service is running.
+    """
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Incident Analyzer',
+        'timestamp': datetime.now().isoformat()
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
