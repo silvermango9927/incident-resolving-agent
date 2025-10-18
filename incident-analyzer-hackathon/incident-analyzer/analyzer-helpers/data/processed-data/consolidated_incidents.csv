@@ -1,0 +1,256 @@
+Incident_Report,Root_Cause
+"Call ALR-360601 | EDI/API Data Mismatch on HLCU5962669 at PSA Keppel | Issue: Time zone drift caused eventTime to serialize in UTC+0 for partner Partner-E, while TOS computed local UTC+8. Container HLCU5962669 milestones appeared out-of-order on the portal; EDIFACT CODECO 'Gate Out' overshadowed later 'Loaded' event.","Time zone drift caused eventTime to serialize in UTC+0 for partner Partner-E, while TOS computed local UTC+8. Container HLCU5962669 milestones appeared out-of-order on the portal; EDIFACT CODECO 'Gate Out' overshadowed later 'Loaded' event."
+Alert: SMS TCK-265455 | Issue: Spike in DLQ messages after routine maintenance; consumer group lag increased across EDI topic. Part.,Spike in DLQ messages after routine maintenance; consumer group lag increased across EDI topic. Partner Partner-B reported delayed acknowledgements; PSA Tanjong Pagar ops not impacted.
+Alert: SMS TCK-936729 | Issue: ANSI X12 301 inconsistency for MV SILVER CURRENT/43C:,"ANSI X12 301 inconsistency for MV SILVER CURRENT/43C: COARRI shows discharge completed for bay 22, but BAPLIE still lists units in those slots."
+"Subject: Email ALR-535708 | EDI Parsing Issue on EDIFACT CODECO (translator quarantine) Dear Team,
+
+EDIFACT CODECO duplicate detected with conflicting control numbers; later message had older eventTime.",EDIFACT CODECO duplicate detected with conflicting control numbers; later message had older eventTime. Quarantine spiked; publish paused to avoid regression.
+"Alert: SMS TCK-142185 | Issue: Customs flag toggled incorrectly for EMCU1669540, causing manual hold. Downstream feeds showed 'Hold.","Customs flag toggled incorrectly for EMCU1669540, causing manual hold. Downstream feeds showed 'Hold' while TOS remained 'Available' at PSA Keppel."
+"Subject: Email ALR-881385 | Vessel MV STELLAR WIND/43C exception at Tuas Port
+
+Dear Team,
+
+Schedule API intermittently returns 401 for MV STELLAR WIND/43C; slowest 5% of requests latency > 12s.",Schedule API intermittently returns 401 for MV STELLAR WIND/43C; slowest 5% of requests latency > 12s. External subscribers missed webhook pushes; fallback polling exposed gaps in berth window at Tuas Port.
+Alert: SMS INC-782713 | Issue: Field mapping mismatch across systems for container ONEU7200552. Partner Partner-E posted EDIFACT CO.,"Field mapping mismatch across systems for container ONEU7200552. Partner Partner-E posted EDIFACT COPRAR with size/type as 22G1, but our master lists 45R1."
+Call ALR-717476 | Container MAEU0713758 exception reported at PSA Tanjong Pagar | Issue: Discrepancy between customer portal and TOS for container MAEU0713758 on voyage RT33.,Discrepancy between customer portal and TOS for container MAEU0713758 on voyage RT33. Portal shows 'Loaded @ TU13' while TOS indicates 'In Yard - Block A1'.
+"Alert: SMS INC-125434 | Issue: ETA/ETB mismatch for MV PACIFIC GLORY (IMO 6309714, CS-7KZV3) on voyage 002E. Berth plan shows ETB a. Please check immediately.","ETA/ETB mismatch for MV PACIFIC GLORY (IMO 6309714, CS-7KZV3) on voyage 002E. Berth plan shows ETB at BP01 while TOS differs by >90 minutes due to tidal constraints. Partner portal still displays outdated ETA; yard resource plan at PSA Keppel reflects older figures."
+"Subject: Email INC-619806 | API Failure on /bookings/v1 impacting partner traffic
+
+Dear Team,
+
+OAuth token rejection spikes on '/bookings/v1'. Clock skew across nodes yielded 401/403 bursts; clients observed partial responses before circuit opened.",OAuth token rejection spikes on '/bookings/v1'. Clock skew across nodes yielded 401/403 bursts; clients observed partial responses before circuit opened.
+"Subject: Email ALR-952015 | EDI/API Data Mismatch on HLCU4722541 at Tuas Port
+
+Dear Team,
+
+Shipper/consignee role swap observed on API payload for HLCU4722541.",Shipper/consignee role swap observed on API payload for HLCU4722541. Upstream denormalization reversed NAD qualifiers; billing prep failed validation.
+"Subject: Email ALR-136820 | API Failure on /manifest/validate impacting partner traffic
+
+Dear Team,
+
+Intermittent 429 on '/manifest/validate' during webhook deliveries to Partner-E. slowest 5% of requests latency > 12s triggered breaker; retries hit max; delivery backlog observed. Downstream customer timeline showed gaps; Pasir Panjang Terminal 2 ops unaffected but visibility degraded.",Intermittent 429 on '/manifest/validate' during webhook deliveries to Partner-E. slowest 5% of requests latency > 12s triggered breaker; retries hit max; delivery backlog observed. Downstream customer timeline showed gaps; Pasir Panjang Terminal 2 ops unaffected but visibility degraded.
+"Call ALR-268498 | Vessel MV TITAN CREST/211S exception at Pasir Panjang Terminal 2 | Issue: EDIFACT COARRI inconsistency for MV TITAN CREST/211S: COARRI shows discharge completed for bay 22, but BAPLIE still lists units in those slots.","EDIFACT COARRI inconsistency for MV TITAN CREST/211S: COARRI shows discharge completed for bay 22, but BAPLIE still lists units in those slots. Older timestamp regressed the plan."
+"Subject: FW: EDI SUBMISSION | CS0057390-INC0172705/L
+
+Dear Team,
+
+I have advised user to submit as create and still encounter errors.","Time zone drift caused eventTime to serialize in UTC+0 for partner Partner-A, while TOS computed local UTC+8. Container MAEU2870491 milestones appeared out-of-order on the portal; ANSI X12 315 'Gate Out' overshadowed later 'Loaded' event."
+"Alert: SMS ALR-337802 | Issue: ETA/ETB mismatch for MV PACIFIC GLORY (IMO 1365531, CS-G5XCI) on voyage 88D. Berth plan shows ETB at. Please check immediately.","ETA/ETB mismatch for MV PACIFIC GLORY (IMO 1365531, CS-G5XCI) on voyage 88D. Berth plan shows ETB at BP07 while TOS differs by >90 minutes due to tidal constraints. Partner portal still displays outdated ETA; yard resource plan at PSA Pasir Panjang reflects older figures."
+"Call TCK-248804 | Vessel MV PACIFIC GLORY/7A exception at Pasir Panjang Terminal 2 | Issue: ETA/ETB mismatch for MV PACIFIC GLORY (IMO 9137834, CS-PX8FO) on voyage 7A. Berth plan shows ETB at BP03 while TOS differs by >90 minutes due to tidal constraints.","ETA/ETB mismatch for MV PACIFIC GLORY (IMO 9137834, CS-PX8FO) on voyage 7A. Berth plan shows ETB at BP03 while TOS differs by >90 minutes due to tidal constraints. Partner portal still displays outdated ETA; yard resource plan at Pasir Panjang Terminal 2 reflects older figures."
+"Alert: SMS INC-971415 | Issue: OCR system failed to correctly recognize the ID for container EMCU4235988, causing a lane hold to be triggered. The system also flagged seal S2680-ZSE, which did not match the manifest data, leading to a delay in dispatch.","The OCR system failed to capture the correct container ID due to misread data, resulting in a lane hold that delayed dispatch. Manual inspection revealed discrepancies in the seal data as well."
+Subject: Email ALR-815476 | Vessel,"ANSI X12 315 inconsistency for MV STELLAR WIND/25W: COARRI shows discharge completed for bay 22, but BAPLIE still lists units in those slots."
+Call INC-916232 | Container NYKU6346579 exception reported at PSA Pasir Panjang | Issue: Weight and size attributes for NYKU6346579 do not align with manifest data.,Weight and size attributes for NYKU6346579 do not align with manifest data. OMS lists 22G1 whereas the EDI intake translated to 45R1—slot planning at PSA Tanjong Pagar misallocated.
+Alert: SMS INC-971728 | Issue: 429 responses and timeouts on '/containers/status' when querying HLCU0393719. slowest 5% of requests latency > 10s; ret.,429 responses and timeouts on '/containers/status' when querying HLCU0393719. slowest 5% of requests latency > 10s; retries exhausted—gaps visible in customer timeline.
+Alert: SMS ALR-276405 | Issue: Callback delivery failures for HLCU9345212. Webhook sender faced 403 due to peer TLS renegotiation. .,Callback delivery failures for HLCU9345212. Webhook sender faced 403 due to peer TLS renegotiation.
+"Subject: Email ALR-450754 | Operational Anomaly on message pipeline (Partner-B) Dear Team,
+
+Spike in DLQ messages after routine maintenance; consumer group lag increased across EDI topic.",Spike in DLQ messages after routine maintenance; consumer group lag increased across EDI topic. Partner Partner-B reported delayed acknowledgements; PSA Pasir Panjang ops not impacted.
+"Alert: SMS TCK-352223 | Issue: The system failed to process the vessel’s arrival time data for MV OCEAN DAWN/19E, causing a missed ETB BP01 slot. This triggered a lane hold, and towage rescheduling was pending, impacting crane sequencing at PSA Tanjong Pagar.","The vessel’s estimated arrival time (ETA) data was not properly synchronized with the berth scheduling system, resulting in a missed ETB slot and delay in operational processes."
+Alert: SMS INC-487833 | Issue: Rate limiter throttled legitimate traffic after load surge. Hot keys on '/manifest/validate' created.,Rate limiter throttled legitimate traffic after load surge. Hot keys on '/manifest/validate' created cache stampede; error budget burned for the window.
+Call INC-918106 | EDI/API Data Mismatch on HLCU9588926 at Pasir Panjang Terminal 2 | Issue: Shipper/consignee role swap observed on API payload for HLCU9588926.,Shipper/consignee role swap observed on API payload for HLCU9588926. Upstream denormalization reversed NAD qualifiers; billing prep failed validation.
+"Subject: Email ALR-388519 | Container TGHU1929557 exception reported at Pasir Panjang Terminal 2
+
+Dear Team,
+
+Translator rejected EDIFACT COARRI for TGHU1929557: segment count mismatch, sequence skipped 018â†’019â†’021. Missing public milestone though warehouse shows correct move.","Translator rejected EDIFACT COARRI for TGHU1929557: segment count mismatch, sequence skipped 018→019→021. Missing public milestone though warehouse shows correct move."
+Call ALR-994139 | EDI Parsing Issue on BAPLIE (translator quarantine) | Issue: Translator rejected BAPLIE: missing BGM count alignment (UNH/UNT mismatch).,Translator rejected BAPLIE: missing BGM count alignment (UNH/UNT mismatch). Partner Partner-A interchange quarantined; downstream milestone not created.
+Alert: SMS ALR-294138 | Issue: Schedule API intermittently returns 500 for MV OCEAN DAWN/25W; slowest 5% of requests latency > 12s. External subscribe.,Schedule API intermittently returns 500 for MV OCEAN DAWN/25W; slowest 5% of requests latency > 12s. External subscribers missed webhook pushes; fallback polling exposed gaps in berth window at PSA Pasir Panjang.
+Call INC-610906 | API Failure on /auth/token impacting partner traffic | Issue: OAuth token rejection spikes on '/auth/token'. Clock skew across nodes yielded 401/403 bursts; clients observed partial responses before circuit opened.,OAuth token rejection spikes on '/auth/token'. Clock skew across nodes yielded 401/403 bursts; clients observed partial responses before circuit opened.
+Alert: SMS ALR-787326 | Issue: Mismatched shipment party codes for EMCU7870680. Shipper/consignee swapped after a backfill job.,Mismatched shipment party codes for EMCU7870680. Shipper/consignee swapped after a backfill job.
+Call TCK-885339 | Container NYKU4022802 exception reported at PSA Keppel | Issue: 502 responses and timeouts on '/bookings/search' when querying NYKU4022802. slowest 5% of requests latency > 10s; retries exhausted gaps visible in customer timeline.,502 responses and timeouts on '/bookings/search' when querying NYKU4022802. slowest 5% of requests latency > 10s; retries exhausted—gaps visible in customer timeline.
+"Subject: Email TCK-658198 | Container EMCU7296193 exception reported at Tuas Port
+
+Dear Team,
+
+Mismatched shipment party codes for EMCU7296193. Shipper/consignee swapped after a backfill job.",Mismatched shipment party codes for EMCU7296193. Shipper/consignee swapped after a backfill job.
+Call TCK-747973 | EDI Parsing Issue on ANSI X12 315 (translator quarantine),ANSI X12 315 duplicate detected with conflicting control numbers; later message had older eventTime. Quarantine spiked; publish paused to avoid regression.
+"Subject: Email ALR-550089 | Container MSCU3047419 exception reported at PSA Tanjong Pagar
+
+Dear Team,
+
+Duplicate ANSI X12 315 received with conflicting eventTime for MSCU3047419. Later message had older timestamp; last-writer-wins regressed status.",Duplicate ANSI X12 315 received with conflicting eventTime for MSCU3047419. Later message had older timestamp; last-writer-wins regressed status.
+Alert: SMS ALR-992288 | Issue: Duplicate ANSI X12 214 received with conflicting eventTime for EMCU4728808. Later message had older .,Duplicate ANSI X12 214 received with conflicting eventTime for EMCU4728808. Later message had older timestamp; last-writer-wins regressed status.
+Subject: FW: <URGENT>TLI STATUS CHANGED TO LOCAL DISC WITHOUT CO(IL) AMENDMENT-,"With reference to the attached, CO (IL) have submitted T/S with 2nd connecting vessel details. However, today we found that the TLI status is changed to Local discharge, which CO (IL) did not amend anything."
+Alert: SMS ALR-568849 | Issue: Auth token rejection for ONEU3163720 on '/containers/status'. Node clock skew surfacing as intermitt.,Auth token rejection for ONEU3163720 on '/containers/status'. Node clock skew surfacing as intermittent 401/403; partial data for ~18 minutes prior to mitigation.
+Alert: SMS TCK-164228 | Issue: Field mapping mismatch across systems for container CMAU2673332. Partner Partner-C posted ANSI X12 3.,"Field mapping mismatch across systems for container CMAU2673332. Partner Partner-C posted ANSI X12 301 with size/type as 22G1, but our master lists 45R1."
+Call TCK-916118 | Container EMCU8134255 exception reported at Tuas Port | Issue: Duplicate EDIFACT CODECO received with conflicting eventTime for EMCU8134255. Later message had older timestamp; last-writer-wins regressed status..,Duplicate EDIFACT CODECO received with conflicting eventTime for EMCU8134255. Later message had older timestamp; last-writer-wins regressed status.
+"Subject: PORTNET MOBILE ISSUE | CS0057423-INC0172792/L
+
+Dear Team,
+
+Dear Portnet team,
+
+Ref to b/m driver ID 123456, driver already enter PSA Brani GATE, but unable to view container yard location via PORTNET Mobile. Next driver ID 12345 enter PPT, but after key in Pass no page jump back to start.",Inbound EDIFACT IFTSTA failed schema validation: unexpected qualifier in EQD for OOLU1518995. Downstream event not created; timeline incomplete.
+"Subject: FW: EDI SUBMISSION | CS0057390-INC0172705/L
+
+Dear Team,
+
+I have advised user to submit as create and still encounter errors.","I have advised user to submit as create and still encounter errors. Kindly assist
+PC_ERR_00001: Your request encountered an unexpected error."
+"Subject: Email INC-982277 | Container EITU4056440 exception reported at PSA Pasir Panjang
+
+Dear Team,
+
+Auth token rejection for EITU4056440 on '/auth/token'. Node clock skew surfacing as intermittent 401/403; partial data for ~18 minutes prior to mitigation.",Auth token rejection for EITU4056440 on '/auth/token'. Node clock skew surfacing as intermittent 401/403; partial data for ~18 minutes prior to mitigation.
+"Subject: FW: PSA DG MONITORING CHARGES
+
+Dear Team,
+
+Pls help check why UN 9996 unable to update hit system exception
+
+Please review the case and provide a resolution at the earliest. Kindly escalate if necessary.",Pls help check why UN 9996 unable to update hit system exception
+Alert: SMS TCK-184320 | Issue: Translator rejected EDIFACT COPRAR: missing LOC count alignment (UNH/UNT mismatch). Partner Partner-.,Translator rejected EDIFACT COPRAR: missing LOC count alignment (UNH/UNT mismatch). Partner Partner-D interchange quarantined; downstream milestone not created.
+"Subject: Email TCK-273061 | Container OOLU7045424 exception reported at Pasir Panjang Terminal 2
+
+Dear Team,
+
+Weight and size attributes for OOLU7045424 do not align with manifest data. OMS lists 22G1 whereas the EDI intake translated to 45R1 slot planning at PSA Pasir Panjang misallocated.",Weight and size attributes for OOLU7045424 do not align with manifest data. OMS lists 22G1 whereas the EDI intake translated to 45R1—slot planning at PSA Pasir Panjang misallocated.
+"Subject: Email TCK-936630 | Vessel MV CORAL WAVE/25W exception at PSA Tanjong Pagar
+
+Dear Team,
+
+ETA/ETB mismatch for MV CORAL WAVE (IMO 6345416, CS-8YSWY) on voyage 25W. Berth plan shows ETB at TU11 while TOS differs by >90 minutes due to tidal constraints. Partner portal still displays outdated ETA; yard resource plan at PSA Tanjong Pagar reflects older figures.","ETA/ETB mismatch for MV CORAL WAVE (IMO 6345416, CS-8YSWY) on voyage 25W. Berth plan shows ETB at TU11 while TOS differs by >90 minutes due to tidal constraints. Partner portal still displays outdated ETA; yard resource plan at PSA Tanjong Pagar reflects older figures."
+"Subject: Email TCK-870899 | Container MSCU5165395 exception reported at PSA Pasir Panjang
+
+Dear Team,
+
+504 responses and timeouts on '/auth/token' when querying MSCU5165395. slowest 5% of requests latency > 10s; retries exhausted gaps visible in customer timeline.",504 responses and timeouts on '/auth/token' when querying MSCU5165395. slowest 5% of requests latency > 10s; retries exhausted—gaps visible in customer timeline. Coincides with partner load test near PSA Pasir Panjang.
+"Alert: SMS TCK-854024 | Issue: Gate OCR misread the ID for container HLCU9389366, triggering a lane hold. Seal S9802-OE9 was verified but still didn’t match the manifest data, causing a dispatch delay.","OCR system failed to correctly identify the container ID, which led to discrepancies with the manifest data and delayed the dispatch."
+"Alert: SMS TCK-182853 | Issue: BAPLIE inconsistency for MV SEA HORIZON/7A: COARRI shows discharge completed for bay 22, but BAPLIE . Please check immediately.","BAPLIE inconsistency for MV SEA HORIZON/7A: COARRI shows discharge completed for bay 22, but BAPLIE still lists units in those slots. Older timestamp regressed the plan."
+Alert: SMS ALR-294776 | Issue: Weight and size attributes for HLCU1164933 do not align with manifest data. OMS lists 22G1 whereas t. Please check immediately.,Weight and size attributes for HLCU1164933 do not align with manifest data. OMS lists 22G1 whereas the EDI intake translated to 45R1—slot planning at Tuas Port misallocated.
+"Subject: SPIRIT OF BERTRAM / 0ZN65W1MA - MISSING TLI | CS0057455/L
+
+Dear Team,
+
+Hi Team,
+Could I check if there is any additional cost incurred for the TLI declaration?
+
+Please review the case and provide a resolution at the earliest.","Field mapping mismatch across systems for container ONEU0541993. Partner Partner-A posted ANSI X12 214 with size/type as 22G1, but our master lists 45R1."
+"Subject: Email INC-5847124 | TLI Status CS0050188
+
+Dear Team,
+
+Hi Team, Able to advice as user inform unable to find the EBP status in container report
+
+Please review the case and provide a resolution at the earliest.",The user is unable to find the EBP (Electronic Booking Process) status in the container report for TLI Status CS0050188. The user is requesting assistance to locate this status.
+Call TCK-338596 | Container CMAU4031438 exception reported at Tuas Port | Issue: Inbound EDIFACT IFTSTA failed schema validation: unexpected qualifier in EQD for CMAU4031438.,Inbound EDIFACT IFTSTA failed schema validation: unexpected qualifier in EQD for CMAU4031438. Downstream event not created; timeline incomplete.
+"Subject: Email TCK-144618 | Container MSCU2809604 exception reported at PSA Pasir Panjang
+
+Dear Team,
+
+Reefer MSCU2809604 telemetry gap. Temperature feed offline briefly; backfill later within acceptable range.",Reefer MSCU2809604 telemetry gap. Temperature feed offline briefly; backfill later within acceptable range.
+"Alert: SMS ALR-888248 | Issue: Time zone drift caused eventTime to serialize in UTC+0 for partner Partner-A, while TOS computed loc. Please check immediately.","Time zone drift caused eventTime to serialize in UTC+0 for partner Partner-A, while TOS computed local UTC+8. Container HLCU0786400 milestones appeared out-of-order on the portal; BAPLIE 'Gate Out' overshadowed later 'Loaded' event."
+"Subject: RE: GDV NO MISSING - DANUM 173 / 73139W ETA SIN : 05.09.2025 | CS0057312/L
+
+Dear Team,
+
+Kindly check if any action needed on our end as the GDV No. is not in the shipping records.",Kindly check if any action needed on our end as the GDV No. is not in the shipping records.
+"Subject: Email TCK-54787 | Vessel MV ADRIAN MAERSK/002E exception at PSA Portnet
+
+Dear Team,
+
+HI Team,
+Similar with previous case: CS0053439-INC0159773/L where we have duplicate system Vessel Name.","HI Team,
+Similar with previous case: CS0053439-INC0159773/L where we have duplicate system Vessel Name.
+Please assist to change system Vessel Name for new ADRIAN MAERSK with callsign OZUU2 to be ADRIAN MSK i/o ADRIAN MS to avoid same name with callsign 5LLT3 as showing error on below screenshot while creating new Vessel Advice."
+Call ALR-284102 | EDI/API Data Mismatch on CMAU2120099 at PSA Pasir Panjang | Issue: Field mapping mismatch across systems for container CMAU2120099.,"Field mapping mismatch across systems for container CMAU2120099. Partner Partner-D posted ANSI X12 214 with size/type as 22G1, but our master lists 45R1."
+Subject: Email INC-819463,"The system failed to account for the updated vessel ETA and berth window, resulting in scheduling delays."
+Call ALR-424809 | EDI Parsing Issue on BAPLIE (translator quarantine) | Issue:,BAPLIE duplicate detected with conflicting control numbers; later message had older eventTime. Quarantine spiked; publish paused to avoid regression.
+"Subject: Email TCK-346851 | EDI Parsing Issue on EDIFACT CODECO (translator quarantine) Dear Team,
+
+Translator rejected EDIFACT CODECO: missing UNT count alignment (UNH/UNT mismatch).",Translator rejected EDIFACT CODECO: missing UNT count alignment (UNH/UNT mismatch). Partner Partner-A interchange quarantined; downstream milestone not created.
+Alert: SMS ALR-723555 | Issue: Intermittent 503 on '/auth/token' during webhook deliveries to Partner-D. slowest 5% of requests latency > 12s triggere.,Intermittent 503 on '/auth/token' during webhook deliveries to Partner-D. slowest 5% of requests latency > 12s triggered breaker; retries hit max; delivery backlog observed. Downstream customer timeline showed gaps; Tuas Port ops unaffected but visibility degraded.
+"Subject: Email INC-925622 | Container MSCU6635897 exception reported at PSA Keppel
+
+Dear Team,
+
+Customs flag toggled incorrectly for MSCU6635897, causing manual hold.","Customs flag toggled incorrectly for MSCU6635897, causing manual hold. Downstream feeds showed 'Hold' while TOS remained 'Available' at PSA Tanjong Pagar."
+Call INC-153035 | Container EITU4714044 exception reported at Tuas Port | Issue: Discrepancy between customer portal and TOS for container EITU4714044 on voyage BT21.,"We are trying to create Container Range From BSIU 323008 to BSIU 323099, but we are hit with error “Overlapping Container Range(s) found. However, this range could not be found."
+Alert: SMS ALR-673896 | Issue: Discrepancy between customer portal and TOS for container MSCU7645244 on voyage RT33. Portal shows '.,Discrepancy between customer portal and TOS for container MSCU7645244 on voyage RT33. Portal shows 'Loaded @ BP07' while TOS indicates 'In Yard - Block J4'.
+Subject: FW: Alert Alert37436778 assigned to your group : [EDI] pc.,Translator rejected EDIFACT COARRI: missing EQD count alignment (UNH/UNT mismatch). Partner Partner-A interchange quarantined; downstream milestone not created.
+Call INC-234695 | Vessel MV NORTHERN SKY/12B exception at PSA Pasir Panjang | Issue: Schedule API intermittently returns 502 for MV NORTHERN SKY/12B; slowest 5% of requests latency > 12s.,Schedule API intermittently returns 502 for MV NORTHERN SKY/12B; slowest 5% of requests latency > 12s. External subscribers missed webhook pushes; fallback polling exposed gaps in berth window at PSA Pasir Panjang.
+"Subject: Email INC-597699 | Vessel MV BLUE ORBIT/211S exception at PSA Tanjong Pagar
+
+Dear Team,
+
+MV BLUE ORBIT/211S missed ETB BP03 slot due to a delay in processing updated vessel arrival data. Towage reschedule was pending, impacting crane sequencing at PSA Tanjong Pagar.","Vessel ETA was not correctly updated in the scheduling system, causing a mismatch between the updated arrival time and the port’s berth scheduling system."
+"Subject: PORTNET MOBILE ISSUE | CS0057423-INC0172792/L
+
+Dear Team,
+
+Dear Portnet team,
+
+Ref to b/m driver ID 123456, driver already enter PSA Brani GATE, but unable to view container yard location via PORTNET Mobile. Next driver ID 12345 enter PPT, but after key in Pass no page jump back to start.","Dear Portnet team,
+
+Ref to b/m driver ID 123456, driver already enter PSA Brani GATE, but unable to view container yard location via PORTNET Mobile. Next driver ID 12345 enter PPT, but after key in Pass no page jump back to start."
+"Subject: Email TCK-54787 | Vessel MV ADRIAN MAERSK/002E exception at PSA Portnet
+
+Dear Team,
+
+HI Team,
+Similar with previous case: CS0053439-INC0159773/L where we have duplicate system Vessel Name.","Issue:
+Similar to the previous case CS0053439-INC0159773/L, a duplicate system vessel name exists for MV ADRIAN MAERSK with callsign OZUU2. There is a conflict between this vessel and another with callsign 5LLT3, causing an error while creating a new Vessel Advice."
+"Subject: RE: Alert Alert37434072 assigned to your group : [MT_PPT] pc. ERROR.EVENT.NullPointerException
+
+Dear Team,","[MT_PPT] pc. [] NullPointerException: null (RQID:a41f-0be-5689-1e42-2b509) Root cause:
+java.lang."
+Call INC-254222 | API Failure on /containers/search impacting partner traffic | Issue: Rate limiter throttled legitimate traffic after load surge. Hot keys on '/containers/search' created cache stampede; error budget burned for the window.,Rate limiter throttled legitimate traffic after load surge. Hot keys on '/containers/search' created cache stampede; error budget burned for the window.
+Call ALR-705748 | Container MSCU3183933 exception reported at PSA Tanjong Pagar | Issue: Callback delivery failures for MSCU3183933. Webhook sender faced 504 due to peer TLS renegotiation.,Callback delivery failures for MSCU3183933. Webhook sender faced 504 due to peer TLS renegotiation.
+"Alert: SMS INC-485709 | Issue: Translator rejected EDIFACT COARRI for OOLU7037967: segment count mismatch, sequence skipped 018â†’019. Please check immediately.","Translator rejected EDIFACT COARRI for OOLU7037967: segment count mismatch, sequence skipped 018→019→021. Missing public milestone though warehouse shows correct move."
+Call ALR-858889 | Container MAEU5124451 exception reported at PSA Keppel | Issue,"Gate OCR misread ID for MAEU5124451, lane hold triggered. Seal S1857-2XC verified; mismatch with manifest delayed dispatch."
+"Subject: RE: DEPARTURE BAYPLAN & TDR / SGSIN - OLYMPIC BAY / 0PZ72S1NL - 136S - AAXW
+
+Dear Team,
+
+Please assist to check which User ID at what time created EBP record for container SEGU 999999. Thanks.",Please assist to check which User ID at what time created EBP record for container SEGU 999999. Thanks.
+"Subject: Email ALR-925328 | API Failure on /auth/token impacting partner traffic
+
+Dear Team,
+
+Rate limiter throttled legitimate traffic after load surge.",Rate limiter throttled legitimate traffic after load surge. Hot keys on '/auth/token' created cache stampede; error budget burned for the window.
+"""Subject: Containers Not Found in PSA Flat File - SEVILLIA/986N INC0173055/CS0057490 /v
+
+Dear Team,
+
+Dear PSA Team,
+We could not find the following containers in the PSA flat files. However, these containers do exist in the Coarri file (please refer to the attachment).","Dear PSA Team,
+We could not find the following containers in the PSA flat files. However, these containers do exist in the Coarri file (please refer to the attachment)."
+"Subject: SITC - EDI SUBMISSION ERROR  - CS0057480/v
+
+Dear Team,
+
+In the status file, there is an Error Discription:
+Schema error found for IMA2. Please check the input file and re-submit with valid content.",An EDI submission error for SITC (CS0057480/v) has been flagged with a schema error for IMA2. The error message indicates that the input file contains invalid content and needs to be corrected before resubmission.
+"Subject: RE: Alert Alert37434072 assigned to your group : [MT_PPT] pc. ERROR.EVENT.NullPointerException
+
+Dear Team,",Schedule API intermittently returns 500 for MV TITAN CREST/19E; slowest 5% of requests latency > 12s. External subscribers missed webhook pushes; fallback polling exposed gaps in berth window at Tuas Port.
+"Subject: Email INC-5847124 | TLI Status CS0050188
+
+Dear Team,
+
+Hi Team, Able to advice as user inform unable to find the EBP status in container report
+
+Please review the case and provide a resolution at the earliest.",Reefer NYKU5956048 telemetry gap. Temperature feed offline briefly; backfill later within acceptable range.
+"Call INC-449138 | Container EITU5323043 exception reported at Pasir Panjang Terminal 2 | Issue: Customs flag toggled incorrectly for EITU5323043, causing manual hold.","Customs flag toggled incorrectly for EITU5323043, causing manual hold. Downstream feeds showed 'Hold' while TOS remained 'Available' at PSA Pasir Panjang."
+Alert: SMS INC-872399 | Issue: Reefer CMAU8051929 telemetry gap. Temperature feed offline briefly; backfill later within acceptable.,Reefer CMAU8051929 telemetry gap. Temperature feed offline briefly; backfill later within acceptable range.
+"Subject: Email INC-689704 | Container NYKU8964499 exception reported at Pasir Panjang Terminal 2
+
+Dear Team,
+
+Callback delivery failures for NYKU8964499. Webhook sender faced 401 due to peer TLS renegotiation.",Callback delivery failures for NYKU8964499. Webhook sender faced 401 due to peer TLS renegotiation.
+"Dear Team,
+
+We are encountering an ETA/ETB mismatch for MV SUNRISE REEF (IMO 1851952, CS-WWYRA) on voyage 211S. The berth plan indicates an ETB at TU13, but TOS shows a discrepancy of over 90 minutes due to tidal constraints.","ETA/ETB Mismatch:
+The TOS shows a 90-minute discrepancy with the berth plan’s ETB due to tidal constraints. This may be due to incorrect system calculations or data sync issues."
+"Subject: Email TCK-608460 | EDI/API Data Mismatch on ONEU5169339 at Tuas Port
+
+Dear Team,
+
+Field mapping mismatch across systems for container ONEU5169339. Partner Partner-E posted ANSI X12 315 with size/type as 22G1, but our master lists 45R1.","Field mapping mismatch across systems for container ONEU5169339. Partner Partner-E posted ANSI X12 315 with size/type as 22G1, but our master lists 45R1."
+Alert: SMS INC-108584 | Issue:  EDI message REF-IFT-0099 received but no acknowledgment.,"EDI message REF-IFT-0099 was received and processed (status: PARSED), but no acknowledgment was sent, causing the message to remain in ERROR status. The message is missing the ack_at timestamp, which is required for further processing."
+SMS INC-108587 | Issue: EDI message REF-COP-0099 received but no acknowledgment. Please escalate to L3 for further investigation.,"EDI message REF-COP-0099 was received and processed (status: PARSED), but no acknowledgment has been sent, causing the message to remain in ERROR status. The message lacks the ack_at timestamp, which is essential for proper processing and tracking."
+"Subject: Email ALR-861599 | CMAU0000080 - Customer seeing identical Containers on portnet
+
+Hi vedu, 
+
+Customer on PORTNET is seeing 2 identical containers information.",Customer on PORTNET is seeing 2 identical containers information.   Please assist in checking container CMAU0000080.
