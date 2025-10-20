@@ -1,4 +1,4 @@
-# Incident Resolution Multi-Agentic Workflow (IRMAW)
+# The Mavericks' Incident Handler
 
 A suite of agentic workflows to help resolve incident reports and execute solutions
 
@@ -6,7 +6,15 @@ A suite of agentic workflows to help resolve incident reports and execute soluti
 
 ## Running the Incident Analyzer
 
-To get started with the Incident Analyzer Flask application:
+To get started with the Incident Analyzer Flask (frontend) application:
+
+### Step 0: Install necessary packages
+
+```bash
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_md
+```
 
 ### Step 1: Navigate to the Application Directory
 
@@ -73,8 +81,8 @@ Then start the application.
   ```
 
 - **Import errors**: The orchestration agent integration may show warnings if dependencies are missing, but the app will still work using fallback prompts.
-
 - **Port already in use**: If port 5000 is already in use, modify the port in `app.py`:
+
   ```python
   app.run(debug=True, host="0.0.0.0", port=5001)  # Change to different port
   ```
@@ -84,6 +92,6 @@ Then start the application.
 - Voice input of incident reports to make it truly multimodal
 - Using Transformer-based Spatio-temporal attention (TrAIsformer) for hetergenous inputs
 - Create a sandboxed representation of knowledge
-- Finetune LLMs for agent calls, such as Gradient Low Rank Projection
+- Finetune LLMs for agent calls using Gradient Low Rank Projection (GaLore)
 
 > Created by Abhay Ganti, Ambar, Praneeth Suresh

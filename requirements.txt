@@ -1,12 +1,31 @@
+# Core MCP and Web Framework
 fastmcp
 flask
+
+# Vector Database and Embeddings
 chromadb>=0.5.5
 sentence-transformers>=2.6.1
+
+# Data Processing
 numpy
 pandas
 scikit-learn
+openpyxl  # Added: Required for reading Excel files (.xlsx)
+
+# Document Processing
 pypdf
+
+# Templating
 jinja2
-spacy
-en-core-web-sm; sys_platform == 'linux' or sys_platform == 'darwin'  # optional
+
+# NLP - spaCy
+spacy>=3.7.0
+# Download language models after install:
+# python -m spacy download en_core_web_sm
+# python -m spacy download en_core_web_md
+
+# Graph Processing
 networkx
+
+# Standard library modules (no install needed):
+# - pathlib, typing, sys, re, types, importlib, asyncio, functools, time, os, hashlib
