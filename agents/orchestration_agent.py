@@ -1,19 +1,29 @@
 import asyncio
 from pathlib import Path
-from typing import Any, Dict, List
-import sys, re, types, importlib.util  # added
+from typing import Any, Dict
+import sys
+import re
+import types
+import importlib.util
 from fastmcp import FastMCP
 
 
 # Dynamically expose analyzer-helpers as a pseudo-package: analyzer_helpers
 def _bootstrap_analyzer_helpers() -> None:
-    base = (
+    # Prefer local helpers first; fall back to hackathon path if present
+    candidates = [
+        Path(__file__).parent / "analyzer-helpers",
         Path(__file__).parent.parent
         / "incident-analyzer-hackathon"
         / "incident-analyzer"
-        / "analyzer-helpers"
-    )
-    if not base.exists():
+        / "analyzer-helpers",
+    ]
+    base = None
+    for c in candidates:
+        if c.exists():
+            base = c
+            break
+    if base is None:
         return
 
     pkg_name = "analyzer_helpers"
@@ -49,7 +59,7 @@ def _bootstrap_analyzer_helpers() -> None:
 
 _bootstrap_analyzer_helpers()
 
-from analyzer_helpers.cache_requests import get_root_cause_for_incident
+# Note: tools are exposed via MCP but the main orchestrator is separate
 
 mcp = FastMCP("Orchestration Agent")
 

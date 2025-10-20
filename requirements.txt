@@ -1,5 +1,12 @@
-asyncio
 fastmcp
 flask
-pathlib
-typing
+chromadb>=0.5.5
+sentence-transformers>=2.6.1
+numpy
+pandas
+scikit-learn
+pypdf
+jinja2
+spacy
+en-core-web-sm; sys_platform == 'linux' or sys_platform == 'darwin'  # optional
+networkx

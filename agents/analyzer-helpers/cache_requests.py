@@ -1,22 +1,19 @@
 """
-spaCy-based incident cache lookup
----------------------------------
+VectorDB-backed incident cache lookup (Chroma)
+----------------------------------------------
 
-Given an incident report string, check if it is present (by semantic similarity)
-in the consolidated CSV and return the associated root cause.
+Given an incident report string, check for near-duplicates in a Chroma collection
+and return the associated root cause from row metadata. This replaces the earlier
+spaCy/CSV similarity implementation. For compatibility, the public API remains the
+same, and the function will fall back to the CSV method if the vector DB is not
+available.
 
-Rules/behavior:
-- Compare against 'Incident_Report' in consolidated_incidents.csv using phrase-level
-  similarity with spaCy and a 0.90 threshold (same as the notebook pipeline).
-- If any consolidated incident matches, return its 'Root_Cause'. Otherwise, return None.
-- Implements multiple caches to avoid re-processing text and repeated IO:
-  - spaCy Doc cache
-  - Phrase list cache
-  - Pairwise similarity cache
-  - Dataset cache (file mtime-aware)
-  - Query result cache keyed by (cleaned_incident, threshold, dataset_mtime)
+Collections expected (built by build_vector_db.py):
+- incidents_cache: embeddings of the 'Incident_Report' column of consolidated_incidents.csv
+    with per-row metadata including 'Root_Cause'.
 
-Default CSV path: data/processed-data/consolidated_incidents.csv (relative to this file).
+Default CSV path (used for fallback and for metadata display):
+data/processed-data/consolidated_incidents.csv (relative to this file).
 """
 
 from __future__ import annotations
@@ -28,10 +25,22 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+# Vector DB utils (preferred path)
+try:
+    from .vector_db_utils import (
+        DEFAULT_DB_DIR,
+        query_collection,
+    )
+
+    _VDB_AVAILABLE = True
+except Exception:
+    _VDB_AVAILABLE = False
+
+# Fallback spaCy utilities (kept for backward compatibility if Chroma not present)
 try:
     import spacy
-except Exception as e:  # pragma: no cover - environment-specific
-    raise RuntimeError("spaCy must be installed for cache-requests to function") from e
+except Exception:
+    spacy = None  # type: ignore
 
 
 # ---------------------------
@@ -40,11 +49,13 @@ except Exception as e:  # pragma: no cover - environment-specific
 _NLP = None
 
 
-def _load_spacy() -> "spacy.Language":
+def _load_spacy():
     global _NLP
     if _NLP is not None:
         return _NLP
     try:
+        if spacy is None:  # pragma: no cover
+            raise RuntimeError("spaCy is not installed")
         _NLP = spacy.load("en_core_web_md")
     except OSError:
         # Try to download the medium model; if it fails, fall back to small
@@ -63,7 +74,7 @@ def _load_spacy() -> "spacy.Language":
 # ---------------------------
 # Text preprocessing and caches
 # ---------------------------
-_doc_cache: Dict[str, "spacy.tokens.Doc"] = {}
+_doc_cache: Dict[str, object] = {}
 _phrase_cache: Dict[str, List[str]] = {}
 _sim_cache: Dict[Tuple[str, str], float] = {}
 
@@ -252,13 +263,53 @@ def get_root_cause_for_incident(
 ) -> Optional[str]:
     """Return the root cause for a given incident by semantic match or None.
 
-    - incident_report: New incident text to look up.
-    - csv_path: Optional override path to consolidated_incidents.csv.
-    - similarity_threshold: Default 0.90 to match the notebook pipeline.
+    Preferred path: Query Chroma collection 'incidents_cache' and accept a hit
+    if cosine distance implies similarity >= threshold. Fallback path: CSV+spaCy
+    phrase similarity (legacy). The threshold is interpreted the same way for both
+    paths as a similarity in [0,1].
     """
     if incident_report is None or str(incident_report).strip() == "":
         return None
 
+    # Try vector DB first
+    if _VDB_AVAILABLE:
+        try:
+            # Query the collection
+            result = query_collection(
+                collection_name="incidents_cache",
+                query_text=str(incident_report),
+                k=5,
+                db_dir=DEFAULT_DB_DIR,
+            )
+
+            # Chroma returns distances (smaller is closer). We used normalized embeddings,
+            # which makes cosine distance = 1 - cosine similarity.
+            distances = result.get("distances", [[]])[0] if result else []
+            metas = result.get("metadatas", [[]])[0] if result else []
+
+            best_match_cause: Optional[str] = None
+            best_sim = -1.0
+            for dist, meta in zip(distances, metas):
+                if dist is None:
+                    continue
+                sim = 1.0 - float(dist)
+                if sim >= similarity_threshold and sim > best_sim:
+                    best_sim = sim
+                    # Expect Root_Cause in metadata; if missing, try to be resilient
+                    rc = meta.get("Root_Cause") if isinstance(meta, dict) else None
+                    best_match_cause = str(rc) if rc is not None else None
+
+            # Cache by current dataset mtime surrogate: use 0.0 because Chroma persists
+            cleaned_incident = clean_text(incident_report)
+            cache_key = (cleaned_incident, float(similarity_threshold), 0.0)
+            _query_result_cache[cache_key] = best_match_cause
+            if best_match_cause is not None:
+                return best_match_cause
+        except Exception:
+            # Fall through to CSV fallback
+            pass
+
+    # Fallback to legacy CSV+spaCy
     rows, mtime = _load_dataset(Path(csv_path) if csv_path is not None else None)
 
     cleaned_incident = clean_text(incident_report)
@@ -266,14 +317,10 @@ def get_root_cause_for_incident(
     if cache_key in _query_result_cache:
         return _query_result_cache[cache_key]
 
-    # Compare against each consolidated incident
     best_match_cause: Optional[str] = None
     best_score = -1.0
-
     for r in rows:
-        score = calculate_phrase_similarity(
-            cleaned_incident, r["_clean"]
-        )  # compare cleaned-to-cleaned
+        score = calculate_phrase_similarity(cleaned_incident, r["_clean"])  # type: ignore[arg-type]
         if score >= similarity_threshold and score > best_score:
             best_score = score
             best_match_cause = r["Root_Cause"]

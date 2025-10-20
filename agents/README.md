@@ -1,3 +1,45 @@
+Agents Overview
+
+Folders/files of interest:
+
+- analyzer-helpers/
+  - build_vector_db.py: Convert consolidated CSV into Chroma collections (incidents_cache, problems_cache)
+  - cache_requests.py: Duplicate detection via Chroma with CSV spaCy fallback
+  - remediation_cache.py: Duplicate detection for remediation problems
+  - vector_db_utils.py: Chroma helpers and embedder
+- knowledge_base_ingest.py: Index PDFs from knowledge_base/ into kb_docs collection
+- cause_analysis_agent.py: Cache check + KB search + (stub) GCRNN + ranking
+- remediation_agent.py: Supervised baseline + RL-ready harness
+- execution_agent.py: Contact selection, email drafting/sending, summary rendering
+- orchestrator.py: Wires agents together and emits JSON/Markdown/HTML summary
+
+How to prepare data (manual run, do not execute automatically):
+
+1. Build vector DB from CSV
+
+   - Ensure processed CSV exists at agents/analyzer-helpers/data/processed-data/consolidated_incidents.csv
+   - Run:
+     python -m agents.analyzer-helpers.build_vector_db --csv agents/analyzer-helpers/data/processed-data/consolidated_incidents.csv
+
+2. Index knowledge base PDFs
+
+   - Place PDFs under knowledge_base/
+   - In Python or CLI, call:
+     from agents.knowledge_base_ingest import index_kb_pdfs
+     index_kb_pdfs(Path('knowledge_base'))
+
+3. Orchestrate an incident
+   - Example:
+     python -m agents.orchestrator --summary "Database connection failures after deploy" --time "2025-10-20 10:30" --sender "oncall@example.com" --component "database"
+
+SMTP and dry run
+
+- Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS to send email. Without them, the system returns dry-run.
+
+Optional local LLM
+
+- You can integrate an ollama/llama.cpp step to polish email or summary text. The current build uses Jinja templates and works fully without an LLM.
+
 # Orchestration Agent
 
 This directory contains the MCP (Model Context Protocol) orchestration agent for incident resolution.
