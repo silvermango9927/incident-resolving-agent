@@ -8,6 +8,10 @@ import importlib.util
 from fastmcp import FastMCP
 
 
+"""This was our intiial testing of an MCP orchestration agent for incident resolution.
+It defines placeholder tools, resources, and prompts that were expanded upon"""
+
+
 # Dynamically expose analyzer-helpers as a pseudo-package: analyzer_helpers
 def _bootstrap_analyzer_helpers() -> None:
     # Prefer local helpers first; fall back to hackathon path if present
