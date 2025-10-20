@@ -7,16 +7,34 @@ import re
 import asyncio
 import urllib.request
 import os
+import sys
 from datetime import datetime
-from fastmcp import Client
+from pathlib import Path
+import sys
+
+# Add the agents directory to the path to import orchestration_agent
+# sys.path.append(str(Path(__file__).parent.parent.parent / "agents"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "agents"))
 
 app = Flask(__name__)
 
-# Initialize MCP client (assuming orchestration agent is running)
-mcp_client = Client("http://127.0.0.1:8000")  # Default FastMCP server address
-
 # Store the last analysis result for CSV download
 last_analysis_result = None
+
+
+def get_mcp_client():
+    """
+    Get an MCP client connected to the orchestration agent.
+    Uses in-memory connection for reliability.
+    """
+    try:
+        from fastmcp import Client
+        from orchestration_agent import mcp as orchestration_server
+
+        return Client(orchestration_server)
+    except Exception as e:
+        print(f"Warning: Could not initialize MCP client: {e}")
+        return None
 
 
 async def get_incident_analysis_prompt_from_mcp(incident_description: str) -> str:
@@ -24,13 +42,33 @@ async def get_incident_analysis_prompt_from_mcp(incident_description: str) -> st
     Retrieves the incident analysis prompt from the MCP orchestration agent.
     """
     try:
-        async with mcp_client:
-            prompt = await mcp_client.get_prompt(
+        client = get_mcp_client()
+        if client is None:
+            raise Exception("MCP client not available")
+
+        async with client:
+            prompt_result = await client.get_prompt(
                 "incident_analysis_prompt",
                 {"incident_description": incident_description},
             )
-            # prompt is an MCP prompt object; extract the generated text content
-            return str(prompt.messages[0].content)
+            # Extract the text content from the prompt result
+            if hasattr(prompt_result, "messages") and len(prompt_result.messages) > 0:
+                prompt_text = str(prompt_result.messages[0].content)
+                # Clean up the prompt text if it has extra formatting
+                if prompt_text.startswith(
+                    "type='text' text='"
+                ) or prompt_text.startswith('type="text" text="'):
+                    # Extract the actual text content
+                    import re
+
+                    match = re.search(
+                        r"text=['\"](.+?)['\"](?:\s|$)", prompt_text, re.DOTALL
+                    )
+                    if match:
+                        prompt_text = match.group(1)
+                return prompt_text
+            else:
+                raise Exception("Invalid prompt structure")
     except Exception as e:
         print(f"Error getting prompt from MCP: {e}")
         # Fallback to a default prompt if MCP is unavailable or errors
@@ -131,47 +169,136 @@ The entire output must be valid JSON only. 'escalation_summary' must be the mult
             "max_tokens": 1500,
         }
 
-        data = json.dumps(data)
-        req = urllib.request.Request(url, headers=hdr, data=bytes(data.encode("utf-8")))
+        data_json = json.dumps(data)
+        req = urllib.request.Request(url, headers=hdr, data=data_json.encode("utf-8"))
         req.get_method = lambda: "POST"
 
-        response = urllib.request.urlopen(req)
-
-        response_text = ""
-        # read response
-        resp_body = response.read().decode("utf-8")
-        # The exact parsing will depend on API response shape; attempt to parse for content
         try:
-            resp_json = json.loads(resp_body)
-            # If Azure OpenAI style: choices[0].message.content
-            if "choices" in resp_json and len(resp_json["choices"]) > 0:
-                response_text = resp_json["choices"][0]["message"]["content"]
-            else:
-                # fallback: raw text
-                response_text = resp_body
-        except Exception:
-            response_text = resp_body
-
-        # The model is instructed to return valid JSON only, so parse it
-        try:
-            parsed = json.loads(response_text)
-            return parsed
-        except Exception as e:
-            # If parsing fails, return a helpful error structure
+            response = urllib.request.urlopen(req)
+            response_data = json.loads(response.read().decode("utf-8"))
+            response_text = response_data["choices"][0]["message"]["content"].strip()
+        except urllib.error.HTTPError as http_err:
+            error_body = (
+                http_err.read().decode("utf-8") if http_err.fp else str(http_err)
+            )
+            print(f"HTTP Error from API: {http_err.code} - {error_body}")
             return {
-                "root_cause": "",
-                "remediation_steps": [],
-                "escalation_summary": f"ERROR: Failed to parse model response as JSON. Raw response: {response_text}",
-                "systems_thinking": f"ERROR: Failed to parse model response as JSON. Raw response: {response_text}",
-                "ticket_status": "PARSE-ERROR",
+                "root_cause": f"API request failed with HTTP error {http_err.code}. Please check your API key and endpoint configuration.",
+                "remediation_steps": [
+                    "Verify the Azure OpenAI API key is correct",
+                    "Check the API endpoint URL",
+                    "Ensure your subscription has access to the deployment",
+                    "Review API quota and rate limits",
+                    "Contact API administrator if issues persist",
+                ],
+                "escalation_summary": f"API call failed with HTTP {http_err.code}: {error_body[:200]}",
+                "ticket_status": "PROJ-API-ERROR",
             }
-    except Exception as e:
+        except urllib.error.URLError as url_err:
+            print(f"URL Error from API: {url_err}")
+            return {
+                "root_cause": f"Network error when connecting to API: {str(url_err.reason)}",
+                "remediation_steps": [
+                    "Check network connectivity",
+                    "Verify firewall settings",
+                    "Ensure DNS resolution is working",
+                    "Check if API endpoint is reachable",
+                    "Review proxy settings if applicable",
+                ],
+                "escalation_summary": f"Network connectivity issue: {str(url_err)}",
+                "ticket_status": "PROJ-NETWORK-ERROR",
+            }
+
+        # Parse the JSON response
+        if not response_text:
+            return {
+                "root_cause": "API returned empty response. Please check the API configuration.",
+                "remediation_steps": [
+                    "Verify API endpoint is correct",
+                    "Check API deployment status",
+                    "Review API request parameters",
+                    "Check API logs for errors",
+                    "Contact API administrator",
+                ],
+                "escalation_summary": "Empty response received from API.",
+                "ticket_status": "PROJ-EMPTY-RESPONSE",
+            }
+
+        # Try to extract JSON from response
+        json_match = re.search(r"\{.*\}", response_text, re.DOTALL)
+        if json_match:
+            response_text = json_match.group(0)
+
+        try:
+            analysis_result = json.loads(response_text)
+        except json.JSONDecodeError as json_err:
+            print(f"JSON parsing error: {json_err}")
+            print(f"Response text was: {response_text[:500]}")
+            return {
+                "root_cause": f"API returned invalid JSON. Response: {response_text[:200]}",
+                "remediation_steps": [
+                    "Check if the API model is responding correctly",
+                    "Verify the prompt format is correct",
+                    "Review API response format expectations",
+                    "Try reducing the incident content size",
+                    "Contact API support",
+                ],
+                "escalation_summary": f"Invalid JSON in API response: {str(json_err)}",
+                "ticket_status": "PROJ-JSON-ERROR",
+            }
+
+        # Ensure all required fields are present
+        if "root_cause" not in analysis_result:
+            analysis_result["root_cause"] = (
+                "Unable to determine root cause from the provided incident data."
+            )
+        if "remediation_steps" not in analysis_result:
+            analysis_result["remediation_steps"] = [
+                "Review the incident logs in detail",
+                "Identify affected systems and services",
+                "Implement temporary mitigation measures",
+                "Deploy permanent fix or patch",
+                "Monitor system for recurrence",
+            ]
+        if "escalation_summary" not in analysis_result:
+            analysis_result["escalation_summary"] = (
+                "Incident analysis completed. See root cause and remediation steps above."
+            )
+        if "ticket_status" not in analysis_result:
+            analysis_result["ticket_status"] = "PROJ-AUTO"
+
+        return analysis_result
+
+    except KeyError as key_err:
+        print(f"KeyError in API response: {key_err}")
         return {
-            "root_cause": f"Error calling AI: {e}",
-            "remediation_steps": [],
-            "escalation_summary": "Error during AI call",
-            "systems_thinking": "Error during AI call",
-            "ticket_status": "AI-CALL-ERROR",
+            "root_cause": f"API response missing expected field: {str(key_err)}",
+            "remediation_steps": [
+                "Verify API response format",
+                "Check API deployment configuration",
+                "Review API documentation",
+                "Ensure correct API version is being used",
+                "Contact API administrator",
+            ],
+            "escalation_summary": f"API response format error: missing {str(key_err)}",
+            "ticket_status": "PROJ-FORMAT-ERROR",
+        }
+    except Exception as e:
+        print(f"Unexpected error during analysis: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return {
+            "root_cause": f"An unexpected error occurred during analysis: {str(e)}",
+            "remediation_steps": [
+                "Check the incident data format",
+                "Verify system connectivity",
+                "Review application logs for details",
+                "Retry the analysis",
+                "Contact support if issues persist",
+            ],
+            "escalation_summary": f"Analysis failed with unexpected error: {str(e)}",
+            "ticket_status": "PROJ-FAILED",
         }
 
 
