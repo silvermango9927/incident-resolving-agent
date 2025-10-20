@@ -41,6 +41,7 @@ http://localhost:5000
 
 - **Python 3.10 or higher** (required for fastmcp compatibility)
 - **Flask** (will be imported from requirements if installed)
+- Check the `requirements.txt` file for installation of required packages
 
 ## Testing
 
