@@ -72,7 +72,7 @@ async def get_incident_analysis_prompt_from_mcp(incident_description: str) -> st
     except Exception as e:
         print(f"Error getting prompt from MCP: {e}")
         # Fallback to a default prompt if MCP is unavailable or errors
-        return f"""You are an expert incident response analyst. Analyze the following incident log or report and provide a structured response in JSON format.
+        return f"""You are an expert incident response analyst. Analyze the following incident log or report and provide a structured response in JSON format. In a distinct paragraph, also give a systems thinking perspective easily explaining the problems and key causes and the plausible leverage points in a separate section in JSON format. Then also display the ASCII/UNICODE made feedback loops in JSON format.
 
 Incident Content:
 {incident_description}
@@ -85,7 +85,7 @@ Provide your analysis in the following JSON format (return ONLY valid JSON, no o
         "Step 2: Second action to take",
         "Step 3: Third action to take"
     ],
-    "escalation_summary": "A multi-line summary for escalation purposes with key details about the incident, severity, duration, impact, and resolution",
+    "escalation_summary": "An excellent summary for escalation purposes with key details about the incident, severity, duration, impact, and resolution, additionally displaying a ACII/UNICODE Causal loop diagram of the problem.  In a distinct paragraph, also give a systems thinking perspective easily explaining the problems and key causes and the plausible leverage points in a separate section in JSON format. IMPORTANT! Then also display the ASCII/UNICODE made feedback loops in JSON format. Do not give a verbose answer.",
     "systems_thinking": "A causal-loop/systems-thinking analysis describing key variables, feedback loops, delays, and leverage points",
     "ticket_status": "PROJ-XXXX"
 }}
@@ -95,7 +95,7 @@ IMPORTANT: At the end of your response, include an 'escalation_summary' block in
 Details about the Incident Report
 Time sent: <ISO-8601 or human-readable timestamp>
 Sender: <name or system that sent the report>
-Summary: <one-paragraph, concise summary suitable for escalation>
+Summary: <an excellent summary suitable for escalation along with systems thinking analysis and ASCII/UNICODE causal-loop diagram>
 
 Also include a top-level 'systems_thinking' field that contains a causal-loop style analysis:
 - List key variables (2-5)
