@@ -10,9 +10,11 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+import sys
 
 # Add the agents directory to the path to import orchestration_agent
-sys.path.append(str(Path(__file__).parent.parent.parent / "agents"))
+# sys.path.append(str(Path(__file__).parent.parent.parent / "agents"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "agents"))
 
 app = Flask(__name__)
 
