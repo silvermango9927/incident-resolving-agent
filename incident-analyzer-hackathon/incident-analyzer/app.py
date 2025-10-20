@@ -95,7 +95,7 @@ IMPORTANT: At the end of your response, include an 'escalation_summary' block in
 Details about the Incident Report
 Time sent: <ISO-8601 or human-readable timestamp>
 Sender: <name or system that sent the report>
-Summary: <one-paragraph, concise summary suitable for escalation>
+Summary: <an excellent summary suitable for escalation along with systems thinking analysis and ASCII/UNICODE causal-loop diagram>
 
 Also include a top-level 'systems_thinking' field that contains a causal-loop style analysis:
 - List key variables (2-5)
